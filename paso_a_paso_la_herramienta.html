@@ -1,0 +1,657 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>¿Quién sigue? El mapa del próximo entrenador</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Serif:wght@500;600&display=swap">
+<style>
+:root{
+  --bg:#f4f7f5; --panel:#fefdfc; --panel2:#eef4f1; --ink:#15221e; --ink2:#44574f; --ink3:#71857e; --rule:#dce5e1; --rule2:#c2d1cb;
+  --bar:#2a4d43; --bar-ink:#fefbfb; --bar-ink2:#bcd3cf;
+  --g:#30584d; --sage:#4f8c86; --sage-t:#e2efed; --warm:#c8702a; --warm-t:#f8eadf; --dot:#9db3ac;
+  --sans:"IBM Plex Sans","Segoe UI",Helvetica,Arial,sans-serif; --serif:"IBM Plex Serif",Georgia,"Times New Roman",serif; --mono:"IBM Plex Mono",Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0d1412; --panel:#141e1b; --panel2:#1a2622; --ink:#e7efec; --ink2:#a8bcb5; --ink3:#7e938c; --rule:#23312d; --rule2:#33463f;
+  --bar:#10201b; --bar-ink:#e7efec; --bar-ink2:#8fa9a1;
+  --g:#5fb49a; --sage:#87aeab; --sage-t:#1a2d2a; --warm:#e08a45; --warm-t:#33241a; --dot:#4c605a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0d1412; --panel:#141e1b; --panel2:#1a2622; --ink:#e7efec; --ink2:#a8bcb5; --ink3:#7e938c; --rule:#23312d; --rule2:#33463f;
+  --bar:#10201b; --bar-ink:#e7efec; --bar-ink2:#8fa9a1;
+  --g:#5fb49a; --sage:#87aeab; --sage-t:#1a2d2a; --warm:#e08a45; --warm-t:#33241a; --dot:#4c605a; color-scheme:dark}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+[hidden]{display:none!important}
+.app{height:100%;display:grid;grid-template-rows:auto minmax(0,1fr) auto}
+.top{background:var(--bar);color:var(--bar-ink);padding:calc(env(safe-area-inset-top,0px) + 10px) 20px 10px;display:flex;align-items:center;gap:16px}
+.top b{font-size:.95rem;letter-spacing:.01em}
+.top small{color:var(--bar-ink2);font-family:var(--mono);font-size:.7rem;letter-spacing:.06em;text-transform:uppercase}
+.top .sp{flex:1}
+.top button{font:inherit;font-size:.8rem;color:var(--bar-ink);background:transparent;border:1px solid color-mix(in srgb,var(--bar-ink) 30%,transparent);border-radius:7px;padding:5px 10px;cursor:pointer}
+.top button:hover{background:color-mix(in srgb,var(--bar-ink) 12%,transparent)}
+.stage>*{min-width:0}
+.stage{display:grid;grid-template-columns:minmax(0,38fr) minmax(0,62fr);gap:20px;padding:20px 24px;min-height:0}
+.txt{min-height:0;overflow:auto;padding:6px 6px 6px 2px;display:grid;align-content:start;gap:14px}
+.txt.in{animation:entra .45s ease-out}
+@keyframes entra{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.kick{font-family:var(--mono);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--g);font-weight:600;margin:0}
+h1,h2{font-family:var(--serif);font-weight:600;line-height:1.15;margin:0;text-wrap:balance;letter-spacing:-.005em}
+h1{font-size:clamp(1.9rem,3.4vw,2.9rem)}
+h2{font-size:clamp(1.45rem,2.4vw,2.05rem)}
+.txt p{margin:0;max-width:62ch;color:var(--ink2);font-size:1.02rem}
+.txt p b,.txt li b{color:var(--ink)}
+.lead{font-size:1.12rem!important}
+.meta{font-family:var(--mono);font-size:.78rem!important;color:var(--ink3)!important}
+.hint{display:inline-flex;gap:8px;align-items:center;font-size:.85rem!important;color:var(--ink3)!important}
+kbd{font-family:var(--mono);font-size:.75rem;border:1px solid var(--rule2);border-bottom-width:2px;border-radius:5px;padding:1px 6px;background:var(--panel)}
+.box{background:var(--panel);border:1px solid var(--rule);border-radius:12px;padding:14px 16px;display:grid;gap:8px}
+.box.g{border-left:4px solid var(--g)}
+.box h3{font-size:.78rem;letter-spacing:.07em;text-transform:uppercase;color:var(--ink3);margin:0;font-weight:700}
+.think{background:var(--sage-t);border:1px solid color-mix(in srgb,var(--sage) 35%,transparent);border-radius:12px;padding:12px 14px;display:grid;gap:8px}
+.think .q{font-weight:600;color:var(--ink);margin:0;font-size:.98rem}
+.think button{justify-self:start;font:inherit;font-size:.82rem;font-weight:600;color:var(--g);background:var(--panel);border:1px solid var(--rule2);border-radius:999px;padding:4px 12px;cursor:pointer}
+.think .a{font-size:.92rem!important}
+.big{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}
+.big div{background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:10px 12px;display:grid;gap:2px}
+.big span{font-size:.7rem;color:var(--ink3);text-transform:uppercase;letter-spacing:.06em}
+.big b{font-size:1.5rem;font-variant-numeric:tabular-nums;line-height:1.1}
+.big small{font-size:.74rem;color:var(--ink3)}
+.num{font-variant-numeric:tabular-nums}
+.tbl{width:100%;border-collapse:collapse;font-size:.92rem}
+.tbl th{font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--ink3);font-weight:600;text-align:right;padding:4px 6px;border-bottom:1px solid var(--rule2)}
+.tbl th:first-child,.tbl td:first-child{text-align:left}
+.tbl td{padding:6px;border-bottom:1px solid var(--rule);text-align:right;font-variant-numeric:tabular-nums}
+.tbl tr.hl td{font-weight:700;color:var(--ink)}
+.tbl td .bar{display:inline-block;height:8px;border-radius:4px;background:var(--g);vertical-align:middle;margin-right:6px}
+.k5{display:grid;gap:6px}
+.k5r{display:grid;grid-template-columns:132px minmax(0,1fr) 150px;gap:8px;align-items:center;font-size:.84rem}
+.k5r .n{color:var(--ink2)}
+.k5r .t{font-weight:600;font-size:.8rem}
+.k5b{position:relative;height:10px;background:var(--panel2);border-radius:5px}
+.k5b::after{content:"";position:absolute;left:50%;top:-3px;bottom:-3px;width:1px;background:var(--rule2)}
+.k5b i{position:absolute;top:0;bottom:0;background:var(--warm);border-radius:5px;transition:width .5s,left .5s,right .5s}
+.k5b i.lo{background:var(--ink3);opacity:.45}
+.profs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.prof{font:inherit;text-align:left;color:var(--ink);background:var(--panel);border:1px solid var(--rule);border-top:4px solid var(--c);border-radius:10px;padding:10px 12px;display:grid;gap:2px;cursor:pointer;transition:box-shadow .2s,transform .2s}
+.prof:hover{transform:translateY(-1px)}
+.prof[aria-pressed="true"]{box-shadow:0 0 0 2px var(--c) inset}
+.prof span{font-size:.66rem;letter-spacing:.07em;text-transform:uppercase;color:var(--ink3);font-weight:700}
+.prof b{font-size:1.05rem}
+.prof small{font-size:.75rem;color:var(--ink2)}
+.ctrl{display:grid;gap:10px}
+label{display:grid;gap:4px;font-size:.76rem;font-weight:600;color:var(--ink2)}
+select{font:inherit;font-size:.92rem;color:var(--ink);background:var(--panel);border:1px solid var(--rule2);border-radius:8px;padding:8px 10px;width:100%}
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;background:var(--panel2);border:1px solid var(--rule2);border-radius:8px;padding:3px;gap:3px}
+.seg button{font:inherit;border:0;background:transparent;color:var(--ink2);padding:6px 4px;border-radius:6px;font-size:.8rem;font-weight:600;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--panel);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.card{display:grid;gap:8px}
+.card .who{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.card .who b{font-size:1.3rem;font-family:var(--serif)}
+.card .who span{font-size:.78rem;color:var(--ink3)}
+.card ul{margin:0;padding-left:18px;display:grid;gap:4px;font-size:.88rem;color:var(--ink2)}
+.tag{display:inline-flex;align-items:center;gap:6px;font-size:.68rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink2)}
+.tag i,.leg i{width:10px;height:10px;border-radius:50%;display:inline-block}
+.links{display:grid;gap:4px;font-size:.9rem}
+.links a{color:var(--g);font-weight:600}
+details{font-size:.86rem;color:var(--ink2)}
+details summary{cursor:pointer;font-weight:600;color:var(--ink2)}
+details p{font-size:.86rem!important;margin-top:6px!important}
+/* gráfica */
+.viz{min-height:0;display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:6px;background:var(--panel);border:1px solid var(--rule);border-radius:14px;padding:12px 14px}
+.viz-h{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;flex-wrap:wrap;min-height:22px}
+.viz-h b{font-size:.95rem}
+.leg{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.76rem;color:var(--ink2)}
+.leg span{display:inline-flex;gap:6px;align-items:center}
+.leg .ln{width:20px;height:0;border-top:3px solid var(--g)}
+.leg .ln.d{border-top:1.6px dashed var(--ink2)}
+.svgwrap{min-height:0;position:relative}
+svg.ch{position:absolute;inset:0;width:100%;height:100%;display:block;overflow:visible}
+svg.ch text{font-family:var(--sans)}
+.tk{font-size:11px;fill:var(--ink3)}
+.ax{font-size:12.5px;fill:var(--ink2);font-weight:600}
+.grid{stroke:var(--rule);stroke-width:1}
+.zone{font-size:11px;fill:var(--ink3);font-style:italic}
+.zt{font-style:normal;font-weight:700;fill:var(--ink2);letter-spacing:.05em;font-size:10.5px}
+.refl{stroke:var(--ink3);stroke-dasharray:2 4;stroke-width:1.2}
+.front{fill:none;stroke:var(--g);stroke-width:3.4;stroke-linejoin:round;stroke-linecap:round;animation:fade .5s .55s both}
+.flat{animation:fade .5s .55s both}
+.flat{stroke:var(--ink3);stroke-width:1.5;stroke-dasharray:5 5}
+.tan{stroke:var(--ink2);stroke-width:1.6;stroke-dasharray:7 5}
+.budz{fill:var(--sage);opacity:.1}
+.budl{stroke:var(--sage);stroke-width:1.6}
+.arrow{stroke:var(--warm);stroke-width:2;fill:none}
+.lay{transition:opacity .6s}
+.lay.off{opacity:0;pointer-events:none}
+.pt{transition:transform .9s cubic-bezier(.2,.75,.2,1),opacity .5s;cursor:default;outline:none}
+.pt.click{cursor:pointer}
+.pt .d{fill:var(--dot);fill-opacity:.55;stroke:var(--panel);stroke-width:1.2;transition:fill .4s,fill-opacity .4s}
+.pt[data-k="hi"] .d{fill:var(--ink2);fill-opacity:1}
+.pt[data-k="ref"] .d{fill-opacity:0;stroke:none}
+.pt .star{display:none;fill:var(--ink);stroke:var(--panel);stroke-width:1.4;stroke-linejoin:round}
+.pt[data-k="ref"] .star{display:inline}
+.pt[data-k="hi"] .d,.pt[data-k="cons"] .d,.pt[data-k="ef"] .d,.pt[data-k="agr"] .d{stroke:var(--ink);stroke-width:1.6}
+.pt.dim .d{fill-opacity:.18}
+.leg svg{display:inline-block;vertical-align:middle}
+.pt[data-k="front"] .d{fill:var(--g);fill-opacity:.85}
+.pt[data-k="cons"] .d{fill:var(--sage);fill-opacity:1}
+.pt[data-k="ef"] .d{fill:var(--g);fill-opacity:1}
+.pt[data-k="agr"] .d{fill:var(--warm);fill-opacity:1}
+.pt .ring{fill:none;stroke:var(--ink);stroke-width:1.6;transition:r .3s}
+.pt .ci{stroke:var(--ink3);stroke-width:1.5;stroke-linecap:round;stroke-dasharray:1.5 3.5;opacity:0;transition:opacity .4s}
+.pt.cion .ci{opacity:.7}
+.pt:focus-visible .ring{r:12px;stroke:var(--sage)}
+.lab{font-size:11px;fill:var(--ink2);paint-order:stroke;stroke:var(--panel);stroke-width:3.5px;stroke-linejoin:round;pointer-events:none;animation:fade .5s}
+.lab.k{font-size:13px;font-weight:700;fill:var(--ink)}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.slider{display:grid;gap:2px}
+.slider input{width:100%;accent-color:var(--sage);margin:0;cursor:pointer}
+.slider p{display:grid;grid-template-columns:auto 1fr auto;gap:10px;margin:0;font-size:.74rem;color:var(--ink3);white-space:nowrap}
+.slider p b{color:var(--sage);text-align:center;white-space:normal;font-weight:700}
+.demo{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.demo button{font:inherit;font-size:.78rem;font-weight:600;color:var(--g);background:var(--panel);border:1px solid var(--rule2);border-radius:999px;padding:4px 12px;cursor:pointer}
+.demo button:hover{background:var(--panel2)}
+.vizfoot{font-size:.76rem;color:var(--ink3);margin:0}
+/* portada */
+.cover{display:none}
+.app.is-cover{grid-template-rows:minmax(0,1fr) auto}
+.app.is-cover .top{display:none}
+.app.is-cover .stage{grid-template-columns:1fr;padding:0}
+.app.is-cover .txt,.app.is-cover .viz{display:none}
+.app.is-cover .cover{display:grid}
+.cover{--cv-bg:#3c574d;--cv-ink:#fefbfb;--cv-ink2:#c9dbd7;--cv-sage:#87aeab;--cv-rule:rgba(254,251,251,.18);
+  position:relative;overflow:hidden;background:var(--cv-bg);color:var(--cv-ink);
+  grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);align-items:center;gap:clamp(20px,4vw,64px);
+  padding:calc(env(safe-area-inset-top,0px) + clamp(24px,5vh,56px)) clamp(16px,5vw,72px) clamp(24px,5vh,56px)}
+.cover .cv-txt{position:relative;z-index:1;display:grid;gap:clamp(12px,2.2vh,22px);align-content:center}
+.cover .cv-k{font-family:var(--mono);font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;color:var(--cv-sage);font-weight:600;margin:0}
+.cover .cv-conf{margin:0;font-size:.95rem;color:var(--cv-ink2);letter-spacing:.02em}
+.cover h1{font-family:var(--serif);font-weight:600;line-height:1.02;margin:0;font-size:clamp(2.8rem,6.6vw,5.6rem);letter-spacing:-.015em;color:var(--cv-ink)}
+.cover h1 span{display:block;font-size:.52em;line-height:1.15;color:var(--cv-sage);margin-top:.18em;letter-spacing:-.005em}
+.cover .cv-sub{margin:0;max-width:44ch;font-size:clamp(1.02rem,1.5vw,1.22rem);color:var(--cv-ink2);line-height:1.5}
+.cover .cv-sub b{color:var(--cv-ink);font-weight:600}
+.cover .cv-team{display:grid;gap:2px;padding-top:clamp(12px,2vh,20px);border-top:1px solid var(--cv-rule);max-width:44ch}
+.cover .cv-team b{font-size:1.02rem}
+.cover .cv-team span{font-size:.9rem;color:var(--cv-ink2)}
+.cover .cv-go{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.cover .cv-go button{font:inherit;font-weight:600;font-size:.98rem;color:var(--cv-bg);background:var(--cv-ink);border:0;border-radius:999px;padding:10px 22px;cursor:pointer;transition:transform .2s}
+.cover .cv-go button:hover{transform:translateX(3px)}
+.cover .cv-go small{font-size:.8rem;color:var(--cv-sage)}
+.cover .cv-go kbd{background:transparent;border-color:var(--cv-rule);color:var(--cv-ink2)}
+.cover .cv-src{margin:0;font-family:var(--mono);font-size:.7rem;letter-spacing:.06em;color:var(--cv-sage)}
+.cover .cv-logo{display:grid;justify-items:center;gap:10px;transform:translateY(-9vh)}
+.cover .cv-logo img{width:min(100%,520px);height:auto;display:block;mix-blend-mode:lighten}
+.cover .cv-logo small{font-family:var(--mono);font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--cv-sage)}
+.cover .cv-bgline{position:absolute;inset:auto 0 0 0;width:100%;height:46%;z-index:0;pointer-events:none}
+.cover .cv-bgline path{fill:none;stroke:var(--cv-sage);stroke-width:2;opacity:.22;stroke-linejoin:round}
+@media (max-width:980px){
+  .app.is-cover .stage{padding:0}
+  .cover{grid-template-columns:1fr;min-height:calc(100vh - 70px)}
+  .cover .cv-logo{order:-1;transform:none}
+  .cover .cv-logo img{width:min(60vw,300px)}
+}
+/* navegación */
+.nav{display:flex;align-items:center;gap:14px;padding:10px 24px calc(env(safe-area-inset-bottom,0px) + 12px);border-top:1px solid var(--rule);background:var(--panel)}
+.nav button.b{font:inherit;font-weight:600;font-size:.88rem;border-radius:9px;padding:8px 14px;cursor:pointer;border:1px solid var(--rule2);background:var(--panel);color:var(--ink)}
+.nav button.b.p{background:var(--g);border-color:var(--g);color:var(--panel)}
+.nav button.b:disabled{opacity:.35;cursor:default}
+.dots{flex:1;display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+.dots button{width:30px;height:30px;border-radius:50%;border:1px solid var(--rule2);background:var(--panel);color:var(--ink3);font:inherit;font-size:.72rem;font-weight:700;cursor:pointer;transition:background .3s,color .3s}
+.dots button[aria-current="step"]{background:var(--g);border-color:var(--g);color:var(--panel)}
+.dots button.done{color:var(--g);border-color:var(--g)}
+.prog{height:3px;background:var(--rule)}
+.prog i{display:block;height:100%;background:var(--g);transition:width .5s}
+#tip{position:fixed;z-index:50;pointer-events:none;background:var(--ink);color:var(--panel);font-size:.78rem;line-height:1.4;padding:7px 9px;border-radius:7px;max-width:260px;opacity:0;transition:opacity .15s}
+@media (max-width:980px){
+  .app{height:auto;min-height:100%}
+  .stage{grid-template-columns:1fr;padding:14px 16px}
+  .txt{overflow:visible}
+  .viz{height:min(78vw,520px);min-height:360px}
+  .nav{position:sticky;bottom:0;padding-inline:16px}
+  .top{padding-inline:16px}
+  .dots button{width:26px;height:26px}
+}
+@media (max-width:560px){
+  .profs{grid-template-columns:1fr}
+  .k5r{grid-template-columns:100px minmax(0,1fr);}
+  .k5r .t{grid-column:2}
+  .row2{grid-template-columns:1fr}
+  .slider p{grid-template-columns:1fr;white-space:normal;text-align:center}
+  .slider p span{display:none}
+  .nav .b span{display:none}
+  #fs,#cnt{display:none}
+  .viz{height:auto;min-height:0}
+  .svgwrap{overflow-x:auto;position:static}
+  .svgwrap svg{position:static;min-width:560px;height:auto}
+}
+@media (prefers-reduced-motion:reduce){.pt,.txt.in,.lab,.k5b i,.prog i{transition:none;animation:none}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div><b>¿Quién sigue? El mapa del próximo entrenador</b><br><small>Hackathon ISAC 2026 · Club América</small></div>
+    <span class="sp"></span>
+    <small id="cnt"></small>
+    <button type="button" id="fs" title="Pantalla completa">Pantalla completa</button>
+  </header>
+  <main class="stage">
+    <section class="cover" id="cover" aria-label="Portada">
+      <svg class="cv-bgline" viewBox="0 0 1200 300" preserveAspectRatio="none" aria-hidden="true"><path d="M0 290 H360 V190 H560 V120 H1200"/><path d="M560 120 L1200 -40" style="stroke-dasharray:8 10;opacity:.14"/></svg>
+      <div class="cv-txt">
+        <p class="cv-k">Hackathon ISAC 2026 · Caso Club América</p>
+        <p class="cv-conf">ITAM Sports Analytics Conference</p>
+        <h1>¿Quién sigue?<span>El mapa del próximo entrenador</span></h1>
+        <p class="cv-sub">Una herramienta para comparar el <b>retorno</b> y el <b>riesgo</b> de cada candidato a dirigir al equipo.</p>
+        <div class="cv-team"><b>Águilas Itamitas Analíticas · ITAM</b><span>Francisco Ramírez · Dirección Financiera</span><span>Emilio González · Dirección Financiera y Economía</span></div>
+        <div class="cv-go"><button type="button" id="cvStart">Comenzar →</button><small>o avanza con <kbd>→</kbd></small></div>
+        <p class="cv-src">Datos: StatsBomb (Hudl) · Liga MX, temporada regular 2021/22 a 2024/25</p>
+      </div>
+      <div class="cv-logo"><img src="data:image/webp;base64,UklGRnhBAABXRUJQVlA4IGxBAABwVwGdASqAAgYCPj0ejUQiIaGRueWwIAPEtLd+DW0wjv0p8PgiT+HwDRnfvcUXt/f+//r8ce/xHP/sSZl/lWuvYA///t+3P7h/+p/+c/tP7aeZf9O/zP9p/vPq36Fvb/ufyxon3xv7u+j/SPvN/MP4j/x/4v2BfxH+Y/5X+7/urwTO8/8z/XeoL7Z/T/+j/g/Ya+b81f6D9z/cB/zXpr3ovqPsB/0X/Qfsj7Iuid9A/2XsNfz7++ksb3OKs8eMDtrylVnjxgdteUqs8eMDtrylVnjxgdteUqs8eLo83/9+f464FEjPqYuAfbx4wO2vKVWePGB215Sqzx4wO1S1RwC5j/ZJ+ESB//FAR+3iSUpoerqEJh9HFWePGB215Sqzx4wO2vKVWeLt5cNAjGNh+d9QjVYlTr/+7LfdSpJdGZk88KoemrXlKrPHjA7a8pVZ48YHbXkx6w8sNcABOyFvQcIhFmcWnPKpAmMb+S1yvalQHbXlKrPHjA7a8pVZ48WJ3sjnE4jNpyrpLDI9y1XOj+szzkgj9qX18SYqzx4wO2vKVWePGB215ScsDnruwfeFy0gLz8eeto5SG9tCeW5hgiCNSHhJY8YHbXlKrPHjA7a8pVYc0/4prNvekvqf+su4UwtRBoHBLLoNv+SqsWM25C1jqbzv+YkftxHF3D5EXtD0iSoEgglTzl62KOYDtkmvKVWePGB213R3uYvz7noMRBn0d3+/fY0t12FJEYusmrZ4F00vyrILVenjIyNVx0lh+irEFdvAOSWwQZx7BpP+c0aeMLXlKrPHjA7a8pNKoi8WHuh+zoEIFk2dyG6IpVslcrpTwHC/scYDPGyFtJrQE/wIlcT02sIyAqO15ODN3XlKrPHjA5dTjvJtEW+tO3zeamajxwDTk3ctF+r8kgkpvFb8sodA3z+UvXtLrZmLTHEnwqFBv1Lyy9XQH45Vj7nPwv44zKVWePGB2v9+D6ac//GBUrPb/2J+uWTrCC1rhYuP2Tn4Tm8ei+9dzC6MYXSSNwIVyjzNNiqEcvcx99RV9yqIfuE7YO2/bWgtn2WyK/LPv4olA8f41qI8EpRBKVWePF0dByBrt1H//1yf5/Zz9Dj/FkjokVnLqb3069jKnRbWpWXJlDqEpWF/fVm9n3PPMN8wyiiAoyUtF05YFWEuFBCqzTgpAop6RaKFkneyN+gIJhq+3na8pVYtUjMiDwNcqsDgL2riVSFdwWUhhYzBduli7dpyfh9R8bx89o7GJ4OSf1/eADdzFWpSWj8Ay+vGJtfPHdbLas8p4UUguWHV5L3C8Ti2eb+BENL8XYczSNnrZXXeBfSmUhT9xeGDRHOcVY2zKHZ9uEIk3yBm3WsZcvUv/M3J1qBZfvRyFCclZcFN99XaFGOOnjBV++ZziC9uKKhJejVUgtza5K7+77ICMIfVvE/15Iuq0ORV0TokOIqTs/d25zJg+JqEZUPV/ANaD55zTWck9f8nIVwKXHTwj2YdphTcA8HnMa2Oz7Ame0jqN0J5UowbrFWbe6bT8MeUvth7e19luCJuGe2KS7AwpODnC4aZBUfztLUQhZGg/JadYAkURgoKcFdfs6UOFfVK+wgYUjOU95NOPfqr+FB8bhYJdjj3IVrirT2wWr7t1qVnxQ+0gSAjrEAlGrJ0/A0Plwk/g+GQzfm5n3JTu0LQBgZOuzzUvi+33UBi3EcKXuQ2Ogr0wJLW/ehh+jzf8mXX0u5amdtUKErrqQ9/FF1Qb1ywstHjWRTiQUTFg34Pk8gPF9dkqxAGZgXTTCIuW1Xo0MekxrFPRyyxTGPFOwoD7g0ARQ/DJkrEOeNfP+2u2GzqoKzn9aFWLW11whBcWQzL2CpmGXh2gdh+km49c8GZ62Rx8+6vG1q3KJslZxCUEOO921mmHwX+5tmyZV/m0MnTCLqOAnST4aVC+Do8/mR399IT5smqh7ybMEleRJdgWoIH1tWYv6jnB7cQDE3utTABKBeuKEMHmw9EoYwcKIlsBrEwEkFTKM27LcP51QjDK2XgMrLEmeAvRXPLhewsQwnL4gwErl9d+K4vHWy0s7VTJpKlqlMoW/Zw7gVA0OfA3odJ1SXOKidy3HvkSATc0JbCNdnsK3ccVecPbwDQkiCDmc7XPgYQBR3aeNTi/rnzUN2sQAi9ms50FXqEcDQ/Ebl8lVhOQa4buKOm8dMatM7/8aB5TgXd3zj6PaSy6HwqyeL+wew1q0ee+COw9Zzf3KYUhvbuHEJylMrz7SAKtwB7sA0GUavOAlu4l6VTULyCnqIPm1dpGRG/NEvcLEaI6BFzLhnjh0SLSVYrNBClj03JaxgAH6w+xnouGb0Nz/1zo7I/F1xyQ9NopD49aV5m2Saq2U0OKEyRExC72h3ZLfVUvl9o1bnX/lGlk7cK+wq0gy6f/U19qbmtc53V45BgwaEkNqu9bd0B9lMq/k71ab2su4YkG+WRfvqJLOmfTe+eZhLQ/dK/8l3EbW+/3a0k+jQDss8bzQwbCvoiS/Y+Uq2x7e/s2mgq9a9oqRxUiT0DsqeFLWmaEtqjbFUoXlAm+1A6L9WWNs9snAF4EDbdfVc052hQxaR7j2O6rndlczDl3hlcKmi+yJRmtAc39JqSOiipR03ONb1zSQ8HIEI6RILP2inA9s5ANetqDcblWePi1lvkwEOuk9OeJ4Ma6dvtmVuO6BfJSDfa43MXb1cWqC8CuriGfrgYp/YSXDSx9+/RsndfO2R0Z1i/ChTeEiLB0knLOXTtuAK2CHSsTlhr9JLAg/S1DiI1R6b6SMw/1GQqeS5rVgGT7r9dNCgoeSQ5GiF1DeSP0A5Rvc4p9zb/rpDgh+kT8VUnu4MvDEP2x/65sn5reBvvCYX6XnnN/tGt4FnizZNv1AiGPPVzZzhCW9O5NR6e/ZQ+JFw0FzNAHbU8sbf4fRmHnsL0PH79kBvLwGDt7Ky12/sHeVvKTrzarWk3jXh8PbwP78a8Gw0oLZqpvFS/afxqU8Y1VAv88SchmFDibvIZ6e44uFBf+B6ak3RiYVT3Yx6ilxeRQBPOjtKsY4KSOb92GXYtvcyi69CqZLVxUyZPt92y2Z/Gq6yzywc/t8cZ7SMPmbuavBlZLtf7EnTHHDBBMpajON08x8r9MAe0mxuO5t/AgsFZuCNhtOycHfmHs673Ch490Cfh8xi+5lgqNql7KMiSJ9pSV3TFgQ9o49R7IDmxBQVtgKFj+gX9x4Bjf2w6ASsCLkc2X9VECKq4/TBH9IXcdfmxHuInSmh2vX4NsiStSin457U2GTcu3qO9/VAXDJH4J431q7aScxiJjzQ5kWe4LFXxoWVXatlkNCtj+QZxwjxgc4Pv4RX8qb8qXy09a/CxdUxjjmqwvjA1Khd7m5Az/gjCNL8ZNILPA4OZN4x7XT3nbemQMJwrZEvv82iV7ZaIEb3OanKN7nC6t6PSRAiegjHYXwUm23ltKFQT+vfc6VADUH+/sgqCe8uAg56A4NGxgvw3a/18YkSv7iixhgg1995/QfaM3hm7rylVnjxgdtW5YvM/62q9X5NFcayCNf4Y0JQ0+uKV5gI2ZsZE+gZbBsiC3vXg4pzzZG0reI8VnFWePGB215Sqzx4tJuQXn6Qlg/55JwrN0C5Rvc4qzx4wO2vKVWePGB215t9Z48YHbXlKrPHjA7a8pVZ48YHIAAD+7Ykf6v7486zmAAAAAAAAAAAAX8S1a6XH0aXzX7bRSxINL5fA2Fq1ZDedjM4HK56ln3AfYwhDSWlM7jQX6tuUoSVrcUPzFxWOlfWtLpFnaP2XvTmvRau9CLLtobLVqhLymmcXYAAAAAABOCe2FWnN9oY8XYZg1gVjLuPqH0ZCW7+g/98phvz4oezXH9uyc6rw0sTPjr9suYUImKUYwlACMG4GdLUa54jvFH/2AL4LnFXNI91T6QVE488Q/V7NSRDVZ1H5RkKlc+BVyH8iHgpXpfLeQ3J9NtMXdyBUYga0diTwGtIPlcsQIV0VhAbMJ0uP2IpmiY5CmAO2Lcvu4nVOKGwK4UHiIK+lUPElJTX/urVWjwAAAAABh7pSrqpjiQFGwe1+vM1G0LB2dPs5060s8elFRTGNVp7dnEh+7zrlTtGYNlapQIEWLIAJ42xmscZA5rA+D8nCyxyxcKINY3deq9dB+TOPKbzO18TBaIpoi4ZxyffdSczZ0ieICG5xGs02pxTJ10i0KP15O+qOZ5fk7/k+vXbMAtJS3V0hiYC3NqMBeSSPgthPsXfB5NIcGUICHC0+/GSsCdoWH7FRlhZTFmeXM4D4di5tneq0rIbYdB3plk6TZx7o15+HTzx6KtkD1OUqDZy47Sva+SSqYfl4ZbBbjagAAAAA9/2iYi+QUwYK2EFzPYiGOqgcf1wyggGLIfAIx2288f5Vbrqj1i1kXxLwQdVreZ8lPp2pWxAuincC5W+qNM46IHNMkUdX9WbUBu3KZJmoWEHMcoxwqWQoAdsgBdGPq3yO06xwCrA52l3yfqdtbizilI6tgpUpNfZoZN+tuI0NbFCFC2I12SNVFx5www42OYtNgbwsiL+OktANeOQDDcOVP7OXnwAAAAAswp3bmyHag9xWjjyFEJRgbs+U3gwZ+9ovGo/wmHu2Xq4k2FtL1u6zGaOhFPPS2G1n3KJQuk29fYTRaGz9tnHmAx7VyXWJbLgyZDqA1Xb9YjDBmLfQIFnDrPTbKGWjdAMOTscyUWT45xcCvtJu+THEmGXdBLptK2sz7Om9E5/txRcNBvf7KhkiTe+mlOm9YiWlE37abfT1SKIAAAAATGrPTb+lcmx7Q2v8u4NlkfRRBR7bzI2Hlwv6KHjMsdayI+YqNmRhcfVzRLfjWVBbg6Idroig9LMtpMHXQ+0+k8z3Jyz3JAfqkTUlzg2Liy3E40bzfG6RG5Im3D4JxOcgTaEisra3Piqul6G7TZM0Dg0mFby16SH47Eoczw/9plvaR1Es1OaODgLL0xP1+NhtSt2fxpEgayHep64dXK6AAAAGYkB0ffCz5C3d1efavieiwSMfPK9DUuejiZ2vgAalnfEujSh/AcaNO9YZJcIhBUd7hrJDa0uwAb6TV6+xkrNzbOcG+bNrMfZjSlC3heUlDkHT3M35MG+fDz0Puxb0L8Echetmd9jxjzRkjVgrGQAmQ6XQOczDW5UpLC+0asNzoQXNs5Fb1zF3qQ5PWWFzj8zquIZjv/bSgPHl+RDpY3/dbnrv+XkdA0Cnpt/4dQVq5e8yv8wiz431Zd2HSCaRDC/0mD69HLUQH13V6nFkLtdLc9VSL0S+igk4WPAnPbY5F5PrRV5mOSLMoulAurhzyzDGTH01+EmVAM5QH7V8pjcM3Qp536qPwQm5lMf8pjxTvda59uD6W6dJXjKEdN4QSfri0YVNUVxkISj5zw1g8BtLnPztrfmBD9IgBWo0c/cujLBO6SxFFLg/2fXAA6lSCF4zz1Kvib+EHiMdtjyy/EmB/24A8ISPCkG0L4HHdTSIopUVlCDRQxeAYAAAE0obAXOC0a/hh3kzjAiSt/OUy5rv6kiOYCijQlq5t1SiJn1DBCUHvgfDshVqSiDi6B/ZWGgRoCfC82iKk4P+yHFfRjqVyXRXMsSJFLpTRUz5AMBP/JiIPuTRTvjs1isXU4uZusOaILVdOIZ6vUnTiQrNB3mPhhdtiFMKljo+ucZfFHxs8Bl7Ebvv6yGd1NUXQupPQziUAszW6XnC2dQohQHQMaNZB+1pCwHt8auy+LK8a8KqFz76Z+d4fs+WDGVKIwB/jOKka2TBfBTebDWC96qJx1Kk1lbVHvx6pcIY4/7JoPmI4sUNmjbXuvo+AyYHzp9b8c02SpNJPDpnRp7Yy56T3mz2FmkLMZwQVth0npSPgcKvjOZvb0d/dtlhzmhie/GsLi0FsJ1vSZ+WgVqqYNcUYaf5EoBtReoYtORAMcAADx7ok3Cn66vJL+8PT30qvK9OiwK9tTjynfVCjsfQmXd8cyYaoFxMSg9G8/RA8VwjRxQ+cnTh97S1P80FAt0wK5wwjKPOHNiHisudXc1LXCpHIe6e/gwyiCh8RdfIiMNf1fRylyAtFT0Tlk4TS7Zi6AhVSPfIKuBHpqGx9wejjyDnIRxV/CStt7Pya7EV5G0G1/Q/iLgRnrVAPmYHGbn3o6H6hHWGLJ9c5lUh0/9codkWwj8KVh+4M5q+opvEsG3ICC4OPisXLZxOnISKGHPgJmH+/7qAjcKNUb9wnLBlbTsf5J5FFch+2KqrHwaobwWXjYsMh62OOZQA0JzSl7EXeLh/+hJHKgYS5NgAAAh7kyI0IN3TBzu/THyE8mK/o0qeM1KcqYpeWpNu39p1oyHAiEbYUsa34CUULoF/bJQgXjwVGa/mWe9GAdOEVoXNuY74rTLRJo5qTiaSiHDYCQWcrS8AGf7+o+eQBsvqtFDend3opM2ETuw2GBxk110Hlr6KF7CKC8lm6MEUCtrP4Y5nl2KQOAO+IkuBZOiwb5j86k4pH+T3MmTSlS2yNEaNQ3DEvebD8ArzbkE70iGtskS4BsjFi7xxA5szDIUbweuxsISp56KVsLnsm2VEadgBl6u1kxr1TI3Z8JbazFUYyqC4lRUkaaFgFoqe7g9mEMABK5cE0Iaz663nIrMAoLTRGT+gccRdjWxp4qHrv9R02M5GrulNkscPUMJSiN1TvIpWYU/NR3kQ/OPgl1L9hX8zRxKQ6V6WeGDLYbgMGANO2QwYzn9fPERx1jP0eURWhgfoPsm2dcC3qf8I+ri8WZtsOB0wLhs0M17Fjyf/QO6H1C0AAUWzUHpe4uzMz22L4fS2XwylK8HDkYI1XqMQNwMkFrp/8ucGgHJVoRnO9imDQLUp1SPeeSNrZPXUztlJIRvp+xVGdQKnYjrY0KMX/hceqQowvxKKTnUJZQe0Zw7H8/oCg+TjUlVHRGHfC3cbnk03MMJg4Qcvd3dbXP1cKqk94C7MyF1GXmB+r1DOssaF6+cZIb3fporn+b1z9WoxbIft1p2gdoiRn6xp+DEygzx4CtZB0EyELs2hndJJbuLVWpnB4Xqu13lmjbKgacl15Y5pwuYbtzAdePpoiQ7SXVWZRL2FhwqC+rh/zjAPNE5PvqARHyAIVdYKqNzOYmk99uRgDh/MvXUgzIgve8kgy9qfgRkobMXrr1urMxpezssLn1FZUEUWKqnGGdfurlYeCjP/94T04kNJY3jWd/Fj9N723HdhyAAvyrQi7dF3rLLzcGUB1oosPMqG1DWvfiLqRN9X0duTlOXBxPho8DbBO6Npo/BFoSu3yYM2lF+9qAXNVdiJeNc7wl012DeDeqiQALJKAO5+R/fkBIfSv47OnoHcT8h6xylL5H3OAmSkVx42OVUmWCi0yIZ6EL0bYv6PzTlDWjltGU13gYArIdrIeXlACerNJVA+Lw/pnSo0OrgzOVJ8w9r5nMW2lwV0dxA3fl2/p6AiRdRaUG93m/lUmhk3LpQI69gUNci9A1Y19o94CblVgIN9tTDcMzXCws//Cr6lNt/4B2S/nAA6fa2s4F4eXfD1YhEzqwmQj4MJJW+u5Lj21h6fVK/pvE0jnBFjzo+gRRQXW+LvvQgCm5p5VMcCKLnOjCvkBQ4N6jqBkyd56Wqz2xsi97Lj8InaUHLp6C5/vmKluepZfLlPmn5cp2ZTWk+qw42KoWPdef8u11J4HAhcD0Dx4+SM2hR1jN8dqiKerKJZ6pkaTazGaTZIWdwSAvw42738GwBaW3bIxK2/PLw6CvVLfFAgrbghXILY/w9+jmc3ar+u9inRg4R97fMOjIWTvYh9htMxO1HcvfOXgbgAy7EMZHQ8bwwrrq0+4dtzBoPHMBtRMH0y7pJAARlqd6s1O54xgvJhrkZr7Lgz6+eWJiFWefuIHGw1yf4ohT6RY0S2xaolWEoJAj/ViXCKvT815WREl09q7xlt3gAsw4SyRlhf9n7YCIU9dmqRemZz5DOSRi7CR9+xxRj1tf+l6KxSMEqjsyAAVjPmO34UYCaJ/725lEThpbfLNNiniShqavg+cw/R9d+oX9yggxakTih5e9Z+wlgZGnMA55dH7gcGWvsctlR+dBFEC8B/eQBQF930SyQdOVYKbldX+xlm8uy+pBv6n4+iMUY4CfrbBjWDGR4eKFYcNx3r4xik3GRvSX6hiM1fr+hixG80eJPBrECHinoUHcwXxqoQ+PLqad1JSYWMpcK4FJExvLWuJvmj3NViCQoXZWhERGIBccVZMp+RnRkX4zWX2EHEoLLSrir+kv9YsdVdyXuHiCOHqlQ1TD/VMCu++y2PlM8nAkDi2TC0mj0oALCTnFqRUPY+ctTja1lcHYW5iP8zfOVPrDEwlnDim+mhHXhLD034+B96mn7/dFYa0WZuj1dzwxGc2YEWuQ5FWuOeRPJCRmsfRmkqCV7BObzXWr8Kwf9KBoVrxe7XYhykEz1ozysnBloksONoN+CLpz+zgKeci+H4/v4YoMSAU/mOy60HpIqhdTVFRvRQXU3X/+KXC728fOYWhcPyeJ1R/RH35fHOrihvf5Jdx2KhoE0df6hU3YPl0G9yalLy0KUujgGz1G4/V/Tu+9/0HTFJ854J2mQVf8aaJe0sAADIB+pkhafPtzJNQwKoBW8yVeaR7mPp7CzcX9f1vYGhZew1hvUsMT6iTaOtVW6100LZCuIR0tiD5Ysxqq7S811tke8g80+/ufOtEkHDW9KPvzODq4iWEOiWHQbl1RqWglG7M5lVy5b0fOSUFySnxCW3X9LxK14FGCakQR9XdSqZHwTaGriUq5EuClFatclEnES3OKgv8lGEOEarcRhWL9jlWR5gMtET1ZI5gWrOXeS2488b7i8wFLsYNEfmD0AZctxdkHOtEtmY8YxnVgmxJhwqZp+55qfKzI+DXdJTvENS9qLU915kMYx84qcuGtcqrlu94HrWH94gbxWt7FBHMQuNT/12EIVRVbLnGiNP70kldZKQ42QKTH7DUubpR8CDbv5YkYndjvO9i+5Gk03i+LGtoySY6V1rerSInLXjHEBt5mcMmshDjAh6+Cd+o475HxSacOrSF2a+F0QD7BhfvcDE1aUM9TbsvM4yXw1u37S6ef/2Ur6UQRi4br0mAkMS4bJTvN639Bm6sV9m+PqOXwYihrCX6BtvNiUsG3dptbgDaKgGawToDsQ30TQIBY2tHGW+10kO0OfH8B1ixlB5O8i2HStgjVP+T+UwVw/+E6zPCgeX2wjssR6UaZ/ZUT75yyobbPGqw6h0tSHVnzubMWWLvZZsH6ZY+JkA5zZq4neovIz6dwdmOAw00Zd0T4naWtjeuMBQADEZZUoilrTHJCqkH4aVb4i8EvuYfJ5+ANdyIC+6YJ2CzvyIWLSWvuN+RUhz7CkOFXnqqadw+qo/RkHVkP1skqkQMNMl6O7xboGrxDD7Vdsi+Qo77m0og++a5SddcRQs3DcvfRueW6EoooI/3Xo9myeIVllGXNDiYc1F6eFtcuS26LiK6qpqXSqe8E7YC1WwZdsmT/Z7e/6kioc+iU+0I+ZkS1VjMq5T0PK7iqOuSSOAQPEnJ0mSDUc11/zLjVs1jTDt68Lgk/iOCUD6CCjLfLbEzKeR0Je/kQzRaGKNoW9O/vHX+Ftku4QuU0i+7QsI/vH7dIZJgQqbHrScIuFWYx2UBbVvftuk7OUZ7aRvvXlQZHQt4yvmjrL16GdR8DAccpR3ZNgVD3j/+NN1V5jcjAtvhPBCJdXeQOY+u8BNIYzERikAbIaP90hXHQlz7+3KtWHKLZZwb84qJGTeQ62hmEKNp0QcKN6+pV2BwpwHY8An8WraoSdk6JEOSsOvyEXlZYi2G+BKvSdhhnzhbkBrxyU0joiXfQSkMCcsRIurIbXVkps1ezRIA6EofCM0Mu3YiCRKo/CiVE56d7gDgMBlUVoVoeIhsfPNSVGEQRcypExSavl9mwWbmuP+nVTAxxmXAOLnvDLHovleuahPOClxP/pFq+mVzyp+1RUCVvaufpTWUHXSrHwhKJzqdKPeLqJ5fsDJA7CoCF8LPurg5FclAG6sQEETu6hhgbGsVsflCSuC09rN+2/jjcOumSrpvT0FzZneACoJL0h4Fdijq5LWkg0bE0RO60SHnoRcs7af3KJ8JjeYKHuZWK1Kd/x+Oapc4a4/yKpc9210fG+7pJqETMSq7PzCwbpiyLBS2FSybAerGbD2M9lRa6pW1bcxODiH+OCY7iVPKnuOOLQ2EV9YJDtAv4CzEeHo7NrYfIo1wwCjRBdrD4/nk3gyexe/25EG3KZ/BFHkVN6ladP02jfuSgE/pK6GGe6TTTJ/8srYqzAxQut/kaXmptAAg+Gfmy8k5fUIWfZzP4YhqEGO61npNylgb4xsSws/iYclOtyNccZdkgl0AZcrPSBrDJrLZBed0CfM0S/ILw3dxmyURpUu+tNmEEIdLHDuEMOJZ6whNyeITooYzlsmScQJiIvu1kZ1C/4WoZY5qotWT8C1FObsL9fFzSU0qqJtrYCZ9jclyXHioP7KnerJ5c+KVvL49Z/j1Wa6eICijrRLGW3J5juledttPgaEp77753sFZQW2ajWieSrEyPzT7byo/rHw3x5tKL87Xj19wyZUqFD+UF1TBygu5nkNPpOKZPAPz/MzCH+VmS4YsZcMf5sKrBQgNV2i6SGqZxtuQMf/1ccCINybrFNJdFILgirZxVOfWx0ZN37z2C8KKMFfVWMUC4LpdCLRNHZhLPzP8ndg8zNdd2PCQTHjkpNseXWzdeBdQy9Wy/L8A7sISSTkh6rFuYbjKGz7thLLymmrC+SlWfkI47S+zB7PfXU2QcBXxikOx3Q+1mOBxtwpK7hmN+qgT8TQGT2UB5BETJAYP8ohE9ml8uyyr0/Ra8EQpBouQrBdkD3L0NCwkdkSAhZN5KU8i2VWQ4NQHAV3RCBfAuaUWmDG6SDVCdsvmnZyHRB7uyJO6XhUEcoUFP/D5kHQ7rIrUsM7RmzQerqd7+qTnprzxbtPq9fo43YAt3pjAky32LFYE4JfmguASJIry8hgtVC74BWtk/hCQMRFlJdqv7lQ9orAl1RvV0sho0TTtlW4I4xPTEf35rmZQsdyCpdkSqdzXeJbI4GPCktSues2y1M/Saifb6eAZBmh+dyst6X1DFfkLoT9go6Isj+l8hgs1FnmBXNv1u+CS86aCidS8Ocue1NHQPPbKqXNhnu6L+8dxD7u+zcMy5L5Vb1stHUJ7NYxrTZ9/eSjFLbWiTKQiL3oXA/GEs01LS/XvcVFTmyU/YhWO9ovGrOxM0qELMUzPukB0ffE7ck7apgFBkgom9iFcHlf7FlfEFmRYtb4RR11pzEoW/Xhk0Z3aqc3g6EDLUG4+7Opsx2y5ciAxn/y1nPq0LE1UkqXFmZFsOBp+NfoyIAeKTTJ9nL/W52Gz+C9MWSR2L5jexiWstbPwsQDq76bQ1dCp8DZ4CeDIC73YIzecQDOPFtFKToYFCoptiYB0AGH22l4BTdU9LlK04NzfDuvhLzlbivYGp/N6KFkCxc8iIrgZKBgXzrsSvQoCbpUxIR/Aqa6kTpk75d8cKlZRTxLIYQecCfd2xgVZbmNNlmM1tLUB9nNbr5H4leQ6x+w84hS4fH0aA7TfX+WNJug3CnqDV7Wq2WJFxrLqrK5b4tFWLdRhcy1GkW0voJcgLLY6/ukN5rDP76NqICPkZ6k/GYnMhYZcW8eAX848vyPIRpvcwj13KY2aqgWL8iZqzJ3hl6E072Bax24fjmD8dgcbyyAR9Qg+Q/US3y13aPZcfvJE/Bs26DyPd3B3aItRtHK/7NpJxMbBFo9GMFnkAzIvGuky5UJOkpryZKdf4wbJy39QUAmFb7ZwszjEsRq9AoGVoGDr1rAVzD6+txetJw0o4WiUquIK85N6YFIM/lNBcidQS4qMResk9Ms01QSaKWGIotgS7UBZHnYADkvQTeOrgRcVXTYUkDwe7H6KyGooldb1n6R4fEWA6G0i+75XvNfgmhFdW71zvstDphKxkiR9xHG46bMrRfeYOGKheY1O5skxRKUHr8a3KVCkFrMAzwa9hLmimjejbbC+OywK3pUwg86FL8Ldv8WEmp+CON/6bJaS4wRduCgkkkkbeeo/7+pc7XEOchf+IqaRhHWw2/QHilRb+sMKaf6QDPyQ+LupeItTsF73mnN22bbqyrgtJ4EjPR7/zoWT4bjwxaZQQQod3BtPuM7c21mJUmDLl44MO6VdV0RQTuoNb7qX+GrtngnJ47iZ8spVPFHhY2FcVI5R5RtM+OEy4ALPA+/3JSfz+JpJdgvX5aC92kG62osYr+wU0MfFnFANcU4iXurADCvdcjrqk4yqPZlLeLgoVtyQqz/V2BdcegU2QxM8CjJN0Snq42lbxkIfJVuJrFPhtsRL1G7INNY09VR1nG2h50ijkMiBVEk+QL10kNgWCyLxlrQ192zdYdcrC/fB71Ww0z+LTSeAel6eV9bULzQ5jW+pUmyeRmntQiAGSvAmMKPXtkjotGdTCKXHHHrW3Hc0ToNgXlhC/Okq0I0PfwXvuI4M5c+T4gKL7/DUOfCN/efiIOSr7Edqo+8VfahKhFTTN0V97tvFSfxb8AM+UR7BtjDBf1BcOJDEhg9vnXbjB3E5yjAHcCXuPD+3ss72ELyoBnCa6stSBdLGasMYCy3+b7U5zJHAsdv1ZcLDYLw9Tm3hSyhHrz/Vw4EaPBs6U5wZxHhJJWfWhMmy80PLMOcOuI5ui2ygC05UNOf+zNn93iwf4J8UMALAH8FibnaFtpthrZdICerjJaQwfR7m72KVJL81qk09z4rUf4P7TNHAdLUHR51lYmiyi0mKKMUZdN8N+jBRrXZre5qHWm6PcWevEGPn1MWD/zP7tl4dDC7lzupUzYl1//FLv/B+iKUdTgigILsAf9ObUc6Guay7YuByIPtkgYRuqPv7p7intCPhlVrInhALbAAgjXNJ2ShSLsUBnJZzliD6hxfeJJmIrcTfW6Sf7F6Nrd58iOCMbdZ9OGzeLjo0Apv8dH53clEgxAGb1tn2oI5fF93IWHeDUn4RggDetiXaUhiLY6YfjaAT/KKeJJD9lnc89ftQs1FW5apNXPyo4m2SLUjR5Wc0Ivx6LAUTr4bu/gPXvfbQvwEPlMZNItmmrkzy7TXoMLQ8IRYkgZi+ftvY0DqcctXuXgMWQyyZRQJ58UgCY5/6pcVHGsoqr13eAau1SBBaaz1ILC8RqVAHCe0yaph6Wj/7GtldnHZAxWU19geFPUsn2Jui0Mj+19Sy0m125JtgLTnOzYOIOfdutPef5NAldhj5qF7CuMTrTbmMqax3MbONVEOJSWnTC7Vd3DremNscjY6yBL5bBl4KTE9az5Xjg6vPZcwBUrvFnubi4O25qFC4XK/n7CAKgKJquZ6oHC9Fp+y45obXy76bhftxbb8QT3HAcAT3Q5B4ih+zl0NaiD5vJ9gMBRYfK8o7Hpz1vzpaohq7O76OgBwCSgpGxAOeCFdg5G3A1DB46+4Lg6IVIU/WMAC9maN/V5qtBtdzAjGSSSse7Adrbbgak0b4fmXLp2FTDkvUFpOR8FfSAkam6XqvwhG1ycz/yJmRDYNJPG2CfyYzXeWKvSbUz3tbHeaTufH0wz04qv7+47mDhODJ5VrN+IDvHV3DQOyIL6QUpcaHYwsvAS8QGxTDzxPVbfwKPpYbKVz7KCGsGCDy6m1YjPjG6/Y6v/92k6u6k7B58HLxg2jENtKZ3S3hhwgij6NJAOzeZWn202LoBXncyPZUbE1qoxHC8sJ1ZjP2+lFgDjRVIY+8di8gJYo/kspJXzz/6Z2MboYm9VsAMELg4xdM0kZP/b5i8TZ63JaVcvsZ4X6e54ZOh85jX1Amanlods49YoaM93aMDPBSiPIwrwAd/ZEuFd5DZj09xlr0BQuM6nkweT4KwLT8ZjUQ/wbpq/Ob4C0D76If0Q92k/rE9RRiKt4QN74OtVyEmgE7iDjHgQbyHhseNCrO2VmRK+z5qwXFYaXwtCLaC+i5eSADYF4q9EW1MCk+2BzHj4CzazqUaXOCMCg8KmRBs2Mys+pHFi2LmwJocs3cbMoJGGD6XtvaS9mgVHnDzAgVXS5uBjp2PoyhgrCMbXw7dvYnnkjl+/FWiiqm+wFlRjHmQdNuZEUHFxxilEKGEzeXahw06K3jR/TgylLSGOJljV4nzcGPYdoZrBHmH7ZSSoTlsKQHxzzKZxxt6QMdOEdokNR4t/N0v8iyBn0oJDfbBXbOhJydC9QRCUU6oHpg7/wdC6mYLe9M7ahIF/cbQ+eKlOvEG1SstvAjxpte7T31ozyBgZxTENQNjnm5GoqsRefAVtkRZ7ldMrHjnSSxOIg2Ymg1/mx9z5qulaKYD9MRXkhxqmBYu44MIIAAZDDZNHJaGVzPw2eRvFVdaHrDiLI/K6ZQZNC5bZI6+OSA+eobjaRz2z80M7f4FcH3OVbZJT+e+8GCMBdxcXZmHT4ecfA/YKiX14VbjfeYLdQuVMwzfrftzJUhS1kzixyR/nv8ktV7uKoVI2LqdfMNZjHii1eG1k1nnFRvqwRQ8a3/bS1oti6N/Qg9SZdDuqjJtVeX5jIXvyt54H2H3tRfHlsvFLe+dBEbkezPKm95wl4X2jmOXFqcy6IeOHKAQbsvJT/TU0EYZGerBpRt1lKRopoiIHohCr98DmPpnuxUuBHlud80RBiR6ByQe31YuI+LglDIJPX77pdINs+LsPUyEoTNXrn+CdUzLbV75tWsd/q7gULnASdTyF5/9RbBy2vO8oBvPUc1fQeolljlqhrJSTSo7GNJqbo8qPQwHs3a88EMo5leW0DWaLoWGIVY+F9zRyHVSG9GvrAxFUXmYJNLKSR4TJ81RYjTM6qgHw4Sq5KP4WMmKsVVbXm/qILxFydZ39sMN5ZIkHIRXy4b7usSux51hfJTd1t+C+gL731e0zyObcUgSNigrhm3oNQF7XRsQvLrVz20SDVcJcgNklPVwdV3gJa+XSF9J3LnFPfXWeA7tlfIPrCOpTLlVXh/aQBALM++30nLrZWhAzEqHnd5btNqzUxXCwM0x6GinPva8s1iTS0ZnZM5RqJWwLce4nbOw12FnnxDXkRJ523akkVtPZ+f44/NELlZGK+85x2EndEF172xkfnmbXj3i4doj77QQPzz1YUYQ8tCuw4EmPdAAk1mM0OEnrSKqcw33GyrZCgMm6wB5kWVNfralXY8tNsvUNHupCmp/W6PuKQqjN+bUxq5AX4uIlKeyq/I0+u9LHaf2asvYofw4G+uvDWQpwdbukTcYgKCLKH6dJtX4a9cSCeSVZzPQoaCj59T9DlM+0RdLhKxBBYp8GRd0CqDEpbbNwLX+HPvlbHx/tSjr03/KIAGNvXyZP+Ol0Di9id4/hBoFMW1DTPHZYiQ/BJzPP5FmL9szyJi73JTYHWfX2TnWEfbTzb8NjrJKMogaTSrsLbclV9lu6g4WGW8Zs87tlC2MF6BJeBEbCqT44PeugiPVMmzPSVKOdw3QbL4tsw0i+yH+Hf180sm2F51v6ecn9OrExrmhkV/dIK1XnTqZpmCnDlQWBmibsrNB9NT112rzpB8n5lBqKMfYhNN+WVT0wILnOW92A5LsShzbuJIcnu4HI5D2jeSoYWMp/afCYEmu1iO0QpjZX4zUjQ9UHM5RZZe1MdznsRiSDnFSBz+oC99o+rbNDYVKvjeY7sI4MeJ4dazz4uYawAJV+D1Xa4WtUs0KMvZFn0egnhPa8C7MZ00mA/3sdoOP1432q94KRPPVa4Vudu8s2pjgqCQEQYRo3k+zoKj7gdXo0S7sYpTK6zJ1KRnRuQ5CxCrDS6XHnONPqrmn93VHOvzkgJYtGRYDfJphfk43uIZfQGZp1GUTgX6p/KdOojppaDIpdwoZZhb6y5nwxNR/X3rciFT6J5f7A5NisrAWLTpuH4o7cox0mCR9yS4q1vhIA6VG3K3fSTNYR5X7XnbVIOXTu4C50EI/M/aCtmH6aD3rF58RXMwicXtWCtOYX+BWOiUa2KnjgYjQpCL3BKWgbRyWDX5CsUyuVhyTuZPcxXESYLsbWmcGJ206apD4I2QqJ42wx3AswoSQIUF3J9lPn7o89bR1loP747EJHbNG4bYUMuY/qcvRzHJxc6HBza0wZ0ajXVP8+s2zGUo1YyoSctcQgWTg1DSWfGBQaoCLbEKbNzE2ht/iV/3GRkyEWMqo121nStdI8d7DnxaYMYv5aj4tSGaFVHXVN1NdvJAsCvASTKm6kj3Gc1o53lYZ0dsEbXiK7t/quNIqPB6gB8MpQktUYZCFXQnLCddzAdccxg6Ia9Zb0lj+q3dXRREVURfZSdCy5Mb5cM4lMegvUojJUNCr1LweOAADLtJYjEkkWgsS5xv4PsbT2bANyRfRv0WVrTa6R8k39O0nV2gWkXDwH5ImDiSwcdCvb66cNDcyr60WPkn/+ITjSZolY5Tf1K/JLpCsplQoeR+XPlYFBDZead1tlQmf2eT0ekjMhne3JIDpPMc1RFepDhPubliguVwroVh1PjXLrysSH6n/kHu9bn00Pjnui8AlZpmMRcfbUpDotQUQqtBV+QMTKs37xkAQ6RsU9x8nzBFyd4R+sD2YBOVlg3RgdpZxQpnBZLqypzuYCWc/RtViSAqmegx7EY76ol6fqjFQy1Va/32xnJmble8/LjI4kd+JelJ5SP2RP4WFxT3TgOsoqhIkfM1IqAlgxHeaKbsXXtmKi1ozBDdyLaz+6DtaF471BGfYiRnGiDo8zVirwy9P42O0Jg2x9EKLLq7N44glUVr7A0m2r+fmRWKQ5BqB5p7XKAU5q/Xs/fZCUtWHp7Lwwq7MWLY935tT52ol7Q3ChW5rItSPd/od6lQphPzXPdI98Aa8l3/VmfXH6+Q8fkWiIUKSsS2NCQvUN2iLod1p9WKA0F/L659V97SsKp3a06nm3293r7hmdnMLoBcz7hTFMBlJkunroyjAg/KSUHLnhL9swkS4odTd6sMdlMIlBt7iCZxcp9zdIxsHbcUV751pXjC0aqLG3dDCO8E0ORhIGYJNgipCbZPQi0jWniiXY2QLKTeQxI2zs8mDzaShM6zyUmTuYtDxQyptW+p8qTdOjtCmeez0FfHKEmHWFRE9JDxEJYfNbKV9g0PfBlyXGKoS9EJq+R2m68YHMT1KPT5s4mzQpgFF9dWf18s8h2KF58qF1JrG4s4UjXsIBEqtZa30hhsdZr59eenoxIZNNLQmD/tSJ4OhnE0bB7nC5neye+hbhHaDcuyudfA7DkxA8wFKBbRnGShRHhcscGnZmgvU8iDSB7BLGQ5h7VdOJ7yWBTB/YuQPkql8BR1GYcexA84JOlOKDRLbYmgadd7yZJ5z8ypaeS0SVZqtkis8Q7Zv8EVaFbY/L12s1aeYUXBIIAPrQTyOdLBsIKN9URyFn3UDSpFSGSiIV0qUZzRHDCO7LTPhDNgmIX90XmppYLkSocjnwBKXvEz7KY2BZAZcLxNiunco5jSq34FDra45Q0SQxP6mxZ1u9aq81GLEa/q04DuMFZF2xrnWjeCLn2gsK8zL0en7ar5WIzVXx30TU4J/xPUoj2D4HZdZDMX8OwQrNaaGdPg6Ag9Qpkbn37zom+PUDk5+kxuW2JcjDmBd1wpTi/TQOG20sZ9q1HDUZyzDGBKTCHuQKkvAjWa90hO9n95XWANLWfoVlq58hSBsSo5cluLuNQAKqwNJkDBcPxEWLuwKLyGUuAtVmW7u0iOaD0ihvciyJwkEA79FLUDLBk31kFz3QyKoMvF3xg30gFKJ1/mWiVwm3c9FWE9sV3/YVlDjCxp22zg/A7CZ+yGpQDDPcgIjk3RyeME6A8r4uSBDA4jTNNGn+T6/VK1kf7wnUAkmacAQFLRrNYL5qgca+Aoi/Vrl9T9cGQTtRcS9APxYVwGa7ZrvFBZ48JyZaHIs0T4VGwqfZa5iZc+EWnU7mhk4WpwYcGaZXHk3BZ9CPQtYWT7DAClh7I6R/IRWQgAyXnlh+fIjn2ca1e0USK1j3TSoA3TGrLEOdg2/a/vs7kEVXEUmOtYgVs9eF1uuG4IWBcEPJSW7yHof4l/QR9EIOwdctwnK+GyT4evqaelhQ05kJJDjkCy8Y+D3COD56ti+XHlzTlm3et+QjEEmVhgqsgk5yYSJO6V+FckGUH1DT/msgSrP7abUwLWcHWlFJx+5L4cuj97l0pFWB+npT+bhDdbod5galnNSFG2Elbl9vgCccsOk1uyrgLg/M4z1fZH9e2aPSWKGY6mEYiW9nfWSF+qTXH0FIhMFsDxLK4830epf4BWBqwQ3rYmm+kLzHYBKULiajHCWnNEaCbfKSaqAdcOovufao4JhNgRhgASe1qpdxTh1YGa3vsUys3Q0KrKzUgW/ggcs8oYTPXa7fI8edrAqFGZBvKtRiiI66uVvP5lC3KINfuUEJvL+0UBg05xkbBrfId2qXI0FJyeKB7aLUyEL7VUVKpyku97jbaZ913WCsldn0pLGccbmj8Ba5aX1IU6UJnhp4hW4KQ2gC2du+SeiurRIZlqKHTpQPA8MBwBmu5z0jyRqKF36qXjpTXMMVJ4GYF6hF2vgEgaNOe7SPKF3NtsAYBM8cFjUjHTvleTMksbukEvS5MakL/Bf+0tYYGYeg6R78c1GxwxAxqqgkNZK4vTzEwPPntq+D0rIgtRuUDKnWzn4YhYBWXolyqeyvNLvsKgvwmBCkMceMg8mTgUCyRYGa5ZbDB8AnMlr03b6hy7493VU4xnC5hHrQwHsl1Oy6jzahsSoP84m4M5pjn9lgk+wsAhxx8JxU/8yqTQTmhSGtP8l8WifeFx4d6JjHSKgCjMOVpW8Bd3AtSqMi8IXkRP5QIH9982yXbiU3nLxzJ3Ee7VO2G9QaS+xx5HwRVUcc+k3eOhZ3RJ7OX9h2/FzCpEQdVMmC443tB0iYTNAS2TGpc10NeCpZpcgnVGvzu25lB//n69NitYLwdhZThoIhzewFNNWZJsQbF+VxOID/nmLcwZg50+e8eId/blJquLGCmuNfsM1ayc6cGIzqHUo+W1MfdkD1zA263YG6L8YhQVuT7onz5zdMznuY2Ag/aU123PZxzoRcANx+XNmbqX+R2KHTJ93dC/0olgwJt1I0r0EOsHBK+0Heg2ySbUOA7reScUeVu4C70tTTqM3ma4dDDXtVnruCkQ0A4mPwscwP+jHXVes0Nds0+aTAloPyi1arLvpgWc7mhdd5iim83fBXnwLv5hAb1KNngx2K+GLDLi0g8gllqeVx+VwBOP3i6OiKIDvhKqrwBVdWfwrr1Kyi1rLWukxrY2oFzCcBGdypj0AAD99XnXMZM4XQVZzLnHzIOx9GlIdre8FzPUm1Wv/ZcnGCiGacolgvIK6Qt0o1mpQYONH8Dy/jA9zmke/3HqeXQoOzo+75545hzfZEklmdHhXjCdFchvSMQAs30JZBuYClCrGc5r7UpE2rixX3e0JJBsnVniyAr1ioWwyqucWYc7RD6EQiGQfZz9xwcsbbdp5ZzD2t6+K3NivCdBcDKQIA7yEcOhmh9RtEdkHnCdqqFw4WFySbp2pT9pSaQvb7EOcksHDF8nq9AV31cfv+f/06YE5N4q3vgOl+oTtg16vVRh4OjVnOfy/i+dPPrtlk0QRx4ZJgz0K+o+fZ0xnAfkjOA5GYuL063n9c+EGnUWuUjTdii/3O89Lbu3+YC9SYvLaaLa7u9FDRWcyZn1sDHlkTyZkY4jYvmvCjjWdXkrMZVIH7B36MPXpxZjVClgGuqOegm7+th4G/cUypjbdO7TRwpc1z6rkO9w6USoX+BSWjbQbJwDO6/ikkJqDzAiCaaBTFvK8kVJ9wC5Ki0de8PlgksKoekueUbBo+1HC39rX1mdDpLJfO64XPoB3QhjFdHyyRudn+5jYLQRpWyABqVTAJnWxR3x9zm6Ki55fh6a0WJiT/qa5aUaw7ILuKsgbkpCqQhv0QLazTFw78pBhJBp09xwyzoLub4pmRaDvFXt8nZvKY3i0zK/mtPUCXTYiDgeqgni7xu2Q7s9QB3b0NwM/beJuLlOvN3LumEgC0mkA+EuvpCizToS97exJZ5Rqdx8wBBQKT1V1CQ2UtAUm8vfhj8hBtqfltrXN6BCb0k07obB/MJ4z1AM7M0aowElvqs506RDgGeWmzCvnNX9HDNXsgvVEat2nM5D4vl2LAatvyYg/rtyQ484Vo7MnVNWimZhP95y1ceSKR4GZI+3AvVEpz6H4fpB8WAzd2vddj+k+R7HblY2iuzEzs6D5dBXvI8zHU7ywg+sCTdrlGcgrGZ8Ssf1Jhkf8rokj3SElEwSUd1rcQA039xZF80nRcDsyD85FIR/oZNbApYb3fRtBT/ww8Q95ZOtQ8hw7Zt9Nwe4bDSU7rONhmGjVs3KTwnXZYdpu3oOJbbUvs1mH+V0FZw/CqLAwdcahUf8q1pnqhiEZLgGtv8mOxkaHex7s6cBfU1stXmn5O8nFF+jG0IhzGnoW0e+f8momwT0fO0PivZA8CXio8SP/yMGPbEyCTm6gNinXf5A1LT7nBos71ziGNYea7Y9eLnCZ630t92Hbte+Y/EcTyACKT6IzCRwD7B4KZFeNb43vxnmgReXj/7zYqLmw+1Q3YkZFxuYNnp7J4kPKHS2qo008yA0/9XCPtJQKMvLCM+F4OMmZV7PaRewoHl3JHdz73G9gjvkNDut/qdPz114NQuKO2Rl7ImYHdjRlUIwX0rEZwFFVcm+zu/ye385pkYHG1OHv+eI91YxU2G+54gzATAvm01urfgXcIeZs8GPDvi/OWQUU8i2b2Bohd2mfxJHakjy+FJ8LzOUOK3QTYcnWSfkMXt4Kkq+mhIOmvhwBva6l6jFO6oiERrVAXeBb4Xm/JKHZXqLAK5ntOHNCvF0guCiyaDNVMsyXpAUyuWXNP5YwBgJAB4jT6alaiSi6KCGOtZyJFuc3vxWl0ab1lo/P3rfypTZSWYH3+Frq3S3zf8rLfl6Ph+dR8dPdXZNngoluQsjGzU+uQ5f3JP81KN7/XVF3vEO5hdXGm7kvrHRR87AWg+p+O55C7Z81PM2ngLeHztzGJQbl6wIDLCr96MFD6bXrkiRpmkzHPrEdr3iozSK+gqWLsluqeECHwjOItWISTl91jZev0rKrK0qX4FXBQsZHbheIOZXPru7jS4+k0mV2q4xbpUjCnAmQ1DLuu9lwYW9cPGsJTJfe6gsJ2BtANCj06d1W1QpYN06Yf8WQb4weDLjrydm5BNiyly9sQcjPZZSqAgjr87KAum9NcWcECzq6MOmTYF9zH0/focEJOyZRqBZfNmcdPKhiR4gAAANIQPttuGwaUBDj3Ciq9xDQZjhm1rrC+5QBW/m3FvXj9nqd8lICKbn63PVa2SafNTU1DG9hknrJb/i/cnzM7JB7UYgNQlKS9pDDWNEX99oUYRIx7UqA9GgkmdqxN4fR6xLJdnatVi7OB4xO+sayhXMmzi7mtfhyn2GkYsWAoXCGr/UkKi7N3kZJrKIwYbAKmZJJ5bGePs/NsqPm0kfM00Xrh/GfdRYc+enYX/t5HZz5QFFpc+9aEMa+ZRagBnecgD0goN3XRmF+1laIeDDO7V4kKJuCj+bQG7CvOOjk4K0CIScV0StfyCDYMofi07OgL5Wws6kFgLN40ADYL0Df6oOB/FWxRpvae7gDpccEx4mk/nduWFrVhE0rJkLZlvs3ysAKk42/LdvG25qbFuOzo4HdPbpwAfTd1xNDyX8kq8SOBBwyOONfzH7gQido0V2A2Al1gOJSFsLL99qP/pIyML3dLUMgn6mQ8EvyFlLl8HdZqvd03lFgPtiRqqIXMHAMvjTNByakfRdbsuuTARDBK3Ix4AAAAAGaDK0FRVUVUY3b1iWUu/4/OqRZWTkNQHYuFjKNr3XpB2D/HBSUCxq1BcQhL95QwjSgqgU0BWGzmtZfvqZuOgGNd9owKHDGCsq7/IxUSwgI7RYNUkKX1h5YXAzPb24375/gIRwEmz74A6vx/pSBJ6N3ySi+xliu94hafw+qCRvnWJ3KSv9TUau+pmTijNeA25sVVuT6nswJjlLgDTMLVIbdIHUQXe8DIYm1poXpJJyVuw2SrfuHC4ZogK7IgZ9Aid/nYJ5g1RK+4XAT+5jovRO+1YV2Vz/K96zzvZm7X6nENY0tAbWjVhc88peLbgKbeJWGkCmWy33y2QBeonO+nouwareKDgRGP2AAAAASU7jViU0TswgvqUioV/iUh9frdC5wtXlGt6MCIr3X0EtB/v5peEImUWHr1SMBg8fpNgcfayuyJmtMh58gAAAAAAAAAAAAAAAAAAAA==" alt="Logotipo de ISAC" width="640" height="518"><small>ISAC 2026</small></div>
+    </section>
+    <section class="txt" id="txt" aria-live="polite"></section>
+    <section class="viz" aria-label="Gráfica">
+      <div class="viz-h"><b id="vizT"></b><div class="leg" id="leg"></div></div>
+      <div class="svgwrap" id="svgwrap"></div>
+      <div>
+        <div class="slider" id="sl" hidden>
+          <input type="range" id="bud" min="0" max="0.6" step="0.01" value="0.27" aria-label="Presupuesto de riesgo">
+          <p><span>← Poco cambio de estilo</span><b id="budT"></b><span>Mucho cambio →</span></p>
+          <div class="demo" role="group" aria-label="Escenarios de la demo"><button type="button" data-b="0.15">Continuidad · límite 0.15</button><button type="button" data-b="0.20">Más margen · límite 0.20</button><button type="button" data-b="agr">Transformar · perfil agresivo</button></div>
+        </div>
+        <p class="vizfoot" id="vizF"></p>
+      </div>
+    </section>
+  </main>
+  <div>
+    <div class="prog"><i id="prog"></i></div>
+    <nav class="nav" aria-label="Pasos">
+      <button type="button" class="b" id="prev">← <span>Anterior</span></button>
+      <div class="dots" id="dots"></div>
+      <button type="button" class="b p" id="next"><span>Siguiente</span> →</button>
+    </nav>
+  </div>
+</div>
+<div id="tip" role="tooltip"></div>
+<script type="application/json" id="datos">{"fases":[[0,1,2,3,4,5],[6,7,8,9,10],[11,12,13,14,15,16,17,18],[19,20,21,22,23,24,25,26],[27,28,29,30],[31,32,33]],"nfases":["Construcción","Progresión","Creación","Presión","Defensa","Transición"],"tec":[{"n":"André Soares Jardine","c":"Jardine","g":114,"r":-0.01,"lo":-0.23,"hi":0.2,"dJ":0.0,"s":[-0.0056,-0.0934,-0.0512,0.1047,0.0576,-0.0897,-0.1238,0.0378,0.1203,0.0117,-0.1326,0.0329,-0.0718,-0.0616,0.1237,0.0009,-0.2387,0.0378,-0.2124,0.4391,-0.2257,-0.1603,-0.2203,-0.2563,-0.3522,-0.0961,-0.1154,-0.1468,0.0939,0.0,0.1813,-0.0402,0.0758,-0.1049]},{"n":"Jorge Rodrigo Bava","c":"Bava","g":23,"r":0.02,"lo":-0.22,"hi":0.29,"dJ":0.13,"s":[-0.0106,-0.124,0.0272,0.0376,-0.3155,0.0038,-0.1683,-0.1346,0.1829,0.0586,0.0703,-0.065,0.1094,0.0766,-0.0315,0.0004,0.0459,0.0043,0.0632,-0.0033,-0.1819,-0.1176,-0.1014,-0.3464,-0.0728,-0.2124,0.0142,-0.066,0.1246,0.0001,-0.0919,0.0548,0.2326,0.0343]},{"n":"Beñat San José Gil","c":"San José","g":60,"r":0.02,"lo":-0.18,"hi":0.25,"dJ":0.14,"s":[-0.2565,-0.2298,0.1127,0.0299,-0.2356,0.0023,-0.3525,0.0618,0.0219,-0.1736,-0.3039,0.086,-0.0246,-0.0661,0.0373,-0.002,-0.1471,-0.0513,-0.0372,0.1608,0.0124,0.0258,-0.2518,0.0176,-0.1396,-0.0073,-0.1865,-0.088,0.069,-0.0002,0.1162,-0.0045,-0.0523,-0.117]},{"n":"Ismael Rescalvo Sánchez","c":"Rescalvo","g":31,"r":0.12,"lo":-0.15,"hi":0.37,"dJ":0.15,"s":[0.2619,-0.0148,0.1121,-0.0326,0.0459,0.0522,0.0487,0.0003,-0.1345,0.0301,0.2252,-0.021,-0.217,0.0104,0.0606,0.0005,-0.0258,0.0425,-0.2953,0.1578,-0.2524,0.0075,-0.1449,-0.1886,-0.362,-0.2278,-0.0594,0.0016,0.0784,0.0002,0.1899,0.0166,-0.1314,0.0257]},{"n":"Juan Máximo Reynoso Guzmán","c":"Reynoso","g":34,"r":-0.19,"lo":-0.41,"hi":0.05,"dJ":0.16,"s":[-0.2517,-0.0624,0.2815,0.0516,0.1983,-0.0124,-0.0695,-0.0278,0.0414,-0.0788,-0.44,-0.0513,-0.0776,-0.1905,0.0526,-0.0009,-0.2136,-0.0338,-0.0371,0.1247,-0.0205,0.1358,-0.0486,-0.1237,-0.1859,-0.1627,-0.1082,0.071,0.0838,0.0005,0.3343,-0.0865,-0.1454,0.0503]},{"n":"Ricardo Alfredo Valiño","c":"Valiño","g":22,"r":-0.09,"lo":-0.35,"hi":0.15,"dJ":0.16,"s":[0.0243,-0.2603,0.0003,0.0084,-0.5481,0.0224,-0.1774,-0.0864,0.1918,-0.1305,-0.0756,-0.0701,0.0907,-0.0459,0.0046,-0.0006,-0.0409,-0.0177,0.0653,-0.0849,0.0526,-0.1667,-0.0723,0.0516,-0.0215,-0.1169,-0.017,-0.0527,0.2187,0.0004,-0.0232,0.0247,0.3064,0.0276]},{"n":"Javier Aguirre Onaindía","c":"Aguirre","g":23,"r":-0.49,"lo":-0.73,"hi":-0.25,"dJ":0.17,"s":[0.4037,-0.0905,0.222,-0.0191,-0.1586,-0.0103,-0.003,0.0944,0.0874,-0.0755,-0.1044,0.0292,-0.0218,0.0241,-0.037,0.0,0.022,-0.0018,-0.0219,-0.0173,-0.1595,0.0449,-0.0581,-0.2859,-0.0223,-0.1777,-0.1099,0.0247,0.0237,-0.0008,0.1029,-0.0271,0.008,-0.0049]},{"n":"Ricardo Cadena Martínez","c":"Cadena","g":22,"r":0.02,"lo":-0.25,"hi":0.3,"dJ":0.17,"s":[-0.3194,-0.0851,-0.1394,-0.0142,-0.0788,-0.1644,-0.0258,-0.1501,-0.1487,0.1795,0.1266,-0.0603,0.0032,0.1379,-0.0204,0.0001,-0.0327,-0.0569,-0.1718,0.1138,-0.3968,-0.1212,-0.0441,-0.3952,-0.4098,-0.241,-0.0742,-0.0641,-0.0373,-0.0002,0.0051,-0.0382,0.0238,0.036]},{"n":"Marcelo Fabián Méndez Russo","c":"M. Méndez","g":20,"r":-0.18,"lo":-0.43,"hi":0.09,"dJ":0.17,"s":[0.0291,-0.4977,0.0125,-0.0134,-0.7015,0.0242,-0.3099,0.0436,0.1915,-0.1605,-0.5855,0.0091,0.0792,0.0475,0.0232,-0.0004,-0.1218,-0.0189,0.0705,0.0165,0.0773,-0.0169,-0.1927,-0.2964,-0.1185,-0.1862,-0.1782,-0.001,0.1636,0.0004,0.0136,0.0047,-0.1041,-0.1099]},{"n":"Ricardo Ferretti","c":"Ferretti","g":34,"r":-0.28,"lo":-0.51,"hi":-0.05,"dJ":0.17,"s":[0.1435,0.0524,-0.0119,0.0359,0.4301,-0.19,-0.0602,-0.0065,0.011,0.0289,0.163,0.0453,-0.1894,-0.1293,0.021,-0.0007,-0.1798,-0.0697,-0.3227,0.3059,-0.0062,-0.1878,0.0061,-0.0089,-0.1281,-0.0136,-0.1483,-0.1206,0.0758,-0.0005,0.1122,-0.2447,-0.3542,-0.0218]},{"n":"Gustavo Jose Da Silva Leal","c":"G. Leal","g":34,"r":-0.05,"lo":-0.31,"hi":0.19,"dJ":0.18,"s":[0.1339,0.3853,-0.0335,0.1325,0.6482,-0.1344,0.0242,0.1201,-0.24,0.1957,0.0041,0.029,-0.144,-0.0592,0.01,0.0004,0.0636,0.0099,-0.1725,0.273,-0.502,-0.0734,0.0256,-0.2893,-0.3973,0.025,-0.0848,-0.0965,-0.1024,0.0004,0.1582,-0.0983,0.0128,-0.0096]},{"n":"Diego Andrei Mejía Campo","c":"Mejía","g":24,"r":-0.16,"lo":-0.37,"hi":0.1,"dJ":0.18,"s":[-0.1345,-0.0348,-0.183,-0.0151,0.0918,-0.0336,-0.1224,0.0001,-0.029,0.0284,-0.0552,-0.0279,0.0585,0.0934,-0.0307,-0.0,0.0476,-0.0062,-0.0935,0.0164,0.067,-0.0395,-0.0117,-0.023,0.0601,-0.0685,0.0499,-0.0188,-0.1878,0.0002,0.0336,0.048,-0.0558,-0.1234]},{"n":"Mauro Néstor Gerk Larrea","c":"Gerk","g":85,"r":0.0,"lo":-0.21,"hi":0.21,"dJ":0.19,"s":[-0.165,-0.5269,0.0812,0.0129,-0.5941,0.1554,-0.1672,-0.0922,0.2835,-0.2878,-0.3826,-0.0252,0.2557,-0.1546,0.0076,0.0004,-0.0964,-0.0129,0.261,0.0219,-0.013,-0.1608,-0.2101,0.0153,-0.2528,-0.0117,-0.0875,-0.1194,0.285,0.0007,0.141,0.0092,-0.0034,0.0483]},{"n":"Fernando Ortiz","c":"Ortiz","g":98,"r":-0.04,"lo":-0.22,"hi":0.16,"dJ":0.19,"s":[0.1127,0.1773,0.0931,0.0336,0.295,0.0554,0.1914,0.0938,-0.1042,0.0187,-0.133,0.0015,0.022,-0.0494,0.0339,-0.0018,-0.0316,0.0279,0.1372,0.0648,-0.0181,0.111,-0.0998,-0.0454,-0.0352,-0.1001,-0.0355,0.0316,-0.0369,0.0005,0.1737,-0.0559,-0.1256,0.0448]},{"n":"Renato Manuel Alves Paiva","c":"Paiva","g":51,"r":0.2,"lo":-0.03,"hi":0.45,"dJ":0.19,"s":[0.2237,0.1502,0.0065,0.1097,0.349,-0.0227,-0.0141,0.1693,-0.0646,0.0554,-0.2484,0.1048,-0.4026,-0.2956,0.1024,0.0002,-0.1355,0.0412,-0.3414,0.1355,-0.3345,-0.0649,-0.1663,-0.2633,-0.1416,-0.2368,-0.1743,-0.0135,-0.0845,-0.0025,0.2374,0.0566,-0.2266,0.0086]},{"n":"Eduardo Arce Peña","c":"Arce","g":22,"r":0.06,"lo":-0.2,"hi":0.35,"dJ":0.2,"s":[-0.1158,0.1643,0.0594,-0.0208,0.4984,0.0357,0.1256,-0.061,-0.2665,-0.0092,-0.2915,-0.0434,0.2285,0.1212,-0.0355,0.0004,0.0863,0.0264,0.0978,0.2011,-0.031,-0.1316,-0.0999,0.0519,-0.0925,0.0478,0.1395,-0.0368,0.0496,-0.0004,0.1608,-0.0232,0.0711,-0.05]},{"n":"Ricardo Carbajal","c":"Carbajal","g":20,"r":0.31,"lo":-0.01,"hi":0.56,"dJ":0.2,"s":[0.2151,0.2648,-0.071,0.0855,0.1136,-0.0189,0.0772,0.021,0.0752,0.2229,0.2941,-0.0454,0.3214,-0.0162,-0.018,0.0003,0.0696,0.0452,0.1783,-0.1585,-0.208,-0.1588,-0.0112,-0.1356,0.0147,0.0105,-0.056,-0.0822,-0.0981,0.0002,-0.1673,-0.0956,-0.0338,0.0264]},{"n":"Benjamín Mora Mendívil","c":"Mora","g":48,"r":0.14,"lo":-0.13,"hi":0.34,"dJ":0.2,"s":[-0.2868,-0.1585,0.0123,0.0136,-0.0818,-0.0021,-0.0837,-0.0672,-0.1058,-0.1758,-0.2843,-0.0881,0.2823,0.1106,-0.0185,-0.0,-0.1477,-0.0843,0.1191,0.2562,0.174,-0.1377,-0.0616,-0.0023,-0.0905,-0.1683,-0.1767,-0.1311,0.1173,-0.0011,0.1954,-0.1495,-0.2337,-0.1142]},{"n":"Paulo César Pezzolano Suárez","c":"Pezzolano","g":17,"r":-0.21,"lo":-0.47,"hi":0.04,"dJ":0.2,"s":[-0.2917,-0.119,0.0928,-0.0266,-0.108,-0.0512,0.1105,-0.2829,0.0328,0.1054,0.259,-0.2523,0.2352,0.0128,-0.0345,0.0004,0.0927,0.045,0.0627,0.1063,-0.157,0.0113,-0.1055,-0.0427,-0.2222,0.0203,0.1493,-0.0047,0.0213,0.0008,-0.0482,0.0571,0.2142,0.0394]},{"n":"Antonio Ricardo Mohamed Matijevich","c":"Mohamed","g":38,"r":0.36,"lo":0.11,"hi":0.59,"dJ":0.21,"s":[-0.082,-0.1376,-0.0177,0.0364,-0.2225,0.0191,-0.2638,-0.1003,0.0701,-0.0611,0.1544,-0.0576,-0.3208,-0.004,0.0182,-0.0,-0.009,-0.0001,-0.3598,-0.169,0.2912,-0.1364,0.1886,-0.0185,0.1849,-0.1567,0.038,-0.1125,0.097,0.0006,-0.0673,0.0579,0.0944,0.0322]},{"n":"José Manuel de la Torre Menchaca","c":"De la Torre","g":17,"r":-0.0,"lo":-0.28,"hi":0.28,"dJ":0.21,"s":[-0.2516,-0.5985,0.1304,0.0013,-0.5745,0.0265,-0.1865,-0.1935,0.1783,-0.0796,-0.1463,-0.1539,-0.0983,0.082,0.0067,0.0001,0.0275,0.0066,-0.0781,0.3135,-0.0183,-0.0773,0.0031,0.0389,-0.6004,0.1576,-0.0822,-0.021,0.3947,0.0001,0.2558,-0.0147,0.0511,-0.0169]},{"n":"Sebastián Ariel Méndez Pardiñas","c":"S. Méndez","g":22,"r":-0.0,"lo":-0.26,"hi":0.25,"dJ":0.21,"s":[0.1365,-0.0332,-0.0787,0.0377,0.0132,0.016,0.1414,0.0004,0.1949,0.1546,0.2568,0.0813,-0.2477,-0.16,0.0116,0.0005,0.0735,0.0439,-0.1474,-0.0218,0.2824,-0.0246,0.0883,0.1686,0.1428,-0.0123,0.1574,-0.0113,0.0005,0.0,0.0152,0.1262,0.2733,0.0464]},{"n":"Gustavo Alberto Lema","c":"Lema","g":43,"r":0.28,"lo":0.04,"hi":0.53,"dJ":0.21,"s":[-0.2906,-0.1608,-0.1054,0.0145,-0.2223,0.0113,-0.0436,-0.3168,0.0059,-0.2509,-0.088,-0.2154,0.0682,0.1049,-0.0654,-0.0008,-0.0073,-0.1041,0.007,-0.0221,0.131,0.0185,-0.0544,-0.1963,0.1065,-0.2725,-0.1454,0.0667,-0.0312,-0.0001,-0.0361,-0.0622,-0.1324,-0.091]},{"n":"Rolando Hernán Cristante Mandarino","c":"Cristante","g":48,"r":-0.08,"lo":-0.3,"hi":0.15,"dJ":0.22,"s":[0.3141,0.1961,-0.0409,-0.0261,0.0888,-0.1023,0.1181,-0.0536,-0.0761,-0.0372,-0.0192,-0.0952,0.198,-0.0247,-0.0228,-0.0002,-0.0784,-0.1559,0.0962,-0.0832,-0.3321,-0.0623,-0.1534,0.0144,-0.0352,-0.0557,-0.239,-0.0421,-0.1563,-0.0001,0.003,-0.149,-0.2361,-0.0554]},{"n":"Andrés Luciano Lillini","c":"Lillini","g":68,"r":-0.19,"lo":-0.42,"hi":0.04,"dJ":0.23,"s":[0.3847,-0.1542,-0.0551,0.0367,-0.0869,-0.0264,0.0361,-0.0334,0.2247,-0.1614,0.0813,-0.0041,-0.0486,-0.011,-0.1435,0.0003,0.1326,0.0207,0.032,-0.0438,0.3616,0.107,0.2387,0.0428,0.3543,-0.1412,0.1559,0.0692,0.0103,-0.0003,0.1786,0.0069,0.2017,-0.0191]},{"n":"Martín Gastón Demichelis","c":"Demichelis","g":29,"r":-0.17,"lo":-0.39,"hi":0.1,"dJ":0.23,"s":[0.3438,0.2256,0.0825,0.0233,0.1173,0.0126,0.2025,-0.0247,0.1534,0.0842,0.3015,0.029,0.1603,-0.026,-0.0029,0.0007,0.0496,0.0356,0.1325,-0.1385,-0.1275,0.0864,0.0485,0.2271,-0.1528,0.344,0.098,0.0498,-0.0014,-0.0001,-0.0533,0.0161,0.1424,0.0468]},{"n":"Jaime Arturo Lozano Espín","c":"Lozano","g":30,"r":0.14,"lo":-0.16,"hi":0.42,"dJ":0.23,"s":[0.0371,-0.075,-0.1141,0.0439,-0.2291,-0.0224,-0.0268,-0.1984,0.079,-0.213,-0.0882,-0.0733,-0.117,-0.0695,0.0209,-0.0001,-0.0482,-0.0028,-0.0199,-0.4097,0.1383,0.2451,0.0593,-0.0474,0.3649,-0.0586,0.0548,0.0827,-0.147,-0.0007,-0.2262,-0.0408,-0.0475,-0.0075]},{"n":"Diego Martín Cocca Pera","c":"Cocca","g":51,"r":0.21,"lo":-0.05,"hi":0.41,"dJ":0.23,"s":[-0.0776,0.1343,-0.1083,0.0444,0.015,0.1096,0.1872,0.1743,0.0739,-0.241,-0.1919,0.0825,-0.0476,-0.2575,-0.0438,-0.0011,-0.0344,-0.0685,0.196,-0.2419,-0.3976,0.3134,-0.253,-0.2818,-0.4068,-0.1356,-0.1056,0.1812,-0.1532,-0.0005,-0.113,0.0109,0.0427,-0.009]},{"n":"Gonzalo Pineda Reyes","c":"Pineda","g":17,"r":0.02,"lo":-0.21,"hi":0.28,"dJ":0.24,"s":[-0.1712,-0.2348,0.1502,0.003,-0.423,0.0423,-0.2849,-0.1501,0.1018,-0.0961,-0.3675,-0.042,-0.1907,0.1234,-0.0964,0.0002,0.0541,-0.0707,-0.0206,-0.3833,0.1133,0.1706,-0.0119,0.2357,-0.0228,0.1451,0.0388,0.1117,0.1137,-0.0006,-0.0595,0.0306,-0.103,-0.0003]},{"n":"Pablo Eduardo Repetto Aquino","c":"Repetto","g":24,"r":0.08,"lo":-0.19,"hi":0.38,"dJ":0.25,"s":[-0.3867,-0.476,0.113,-0.0033,-0.597,0.067,0.0011,-0.1291,0.2808,0.0086,0.2206,0.0084,-0.5634,-0.1066,-0.0032,0.0001,0.0552,0.0136,-0.4639,-0.0714,0.1736,0.0156,-0.0814,-0.1023,-0.0961,-0.0328,-0.0051,-0.038,0.2597,0.0002,0.0479,0.0755,0.3089,0.0221]},{"n":"Martín Varini Di Zioli","c":"Varini","g":17,"r":0.21,"lo":-0.07,"hi":0.46,"dJ":0.25,"s":[-0.3043,-0.1052,-0.0826,-0.0334,0.0453,-0.0764,-0.0086,-0.1146,-0.1495,-0.0211,0.0294,-0.018,0.4426,0.213,-0.0225,-0.0001,-0.0718,-0.0364,0.0528,0.0642,0.2476,0.0266,0.0089,-0.0033,0.3062,-0.2029,-0.0873,-0.0508,-0.1379,-0.0004,-0.0462,-0.0756,-0.1966,-0.0298]},{"n":"Eduardo Fentanes Orozco","c":"Fentanes","g":82,"r":0.33,"lo":0.11,"hi":0.52,"dJ":0.26,"s":[-0.3575,-0.726,0.2865,0.0535,-0.8415,0.096,-0.2804,-0.0508,0.2966,0.0269,-0.0119,-0.0111,-0.2168,-0.0659,0.055,0.0008,0.0552,0.0684,-0.1392,0.0754,0.3065,-0.1165,-0.1663,-0.1012,-0.2115,-0.2441,0.1151,-0.0339,0.3834,0.0029,0.1848,0.1388,0.4123,0.1125]},{"n":"Fernando Rubén Gago","c":"Gago","g":28,"r":0.13,"lo":-0.19,"hi":0.37,"dJ":0.26,"s":[0.0011,0.1503,-0.1396,-0.0169,0.0044,-0.0824,0.1862,-0.0274,-0.0262,0.0771,0.2856,-0.0108,0.0294,0.0235,-0.0202,0.0005,-0.0834,-0.026,0.0401,-0.1507,0.143,0.2852,0.1423,0.0728,0.374,0.0927,0.0638,0.0825,-0.2461,-0.0026,-0.16,-0.0071,0.2623,-0.0175]},{"n":"Maurício Nogueira Barbieri","c":"Barbieri","g":26,"r":-0.1,"lo":-0.37,"hi":0.19,"dJ":0.27,"s":[0.1257,0.1825,-0.1413,-0.0475,0.1451,-0.047,0.1468,0.0995,-0.239,0.1661,0.2212,0.0206,0.3236,0.0968,-0.0844,0.0002,0.1293,0.0043,0.3496,-0.253,-0.1764,0.2013,-0.0559,-0.1043,0.0501,-0.1117,0.1716,0.0684,-0.3234,0.0001,-0.211,-0.0145,0.0272,-0.0255]},{"n":"Marcelo Michel Leaño","c":"Leaño","g":20,"r":-0.23,"lo":-0.5,"hi":0.05,"dJ":0.27,"s":[-0.076,0.4761,-0.107,0.0,0.6294,-0.0549,0.1318,0.0213,-0.2256,0.0212,0.3265,0.009,-0.2866,0.182,-0.0733,-0.0008,-0.0464,-0.0594,-0.283,-0.0731,-0.1202,-0.0864,0.2547,0.1819,-0.0331,0.0526,0.0354,-0.0262,-0.1126,-0.0007,-0.1891,-0.0554,-0.2176,0.0539]},{"n":"Marcos Ignacio Ambriz Espinoza","c":"Ambriz","g":92,"r":-0.18,"lo":-0.43,"hi":0.02,"dJ":0.28,"s":[0.2354,0.6812,0.0129,0.0306,0.8568,-0.0088,0.1089,0.1729,-0.2222,0.0699,0.1136,0.1027,-0.5314,-0.0803,0.0915,0.0006,-0.0085,0.0793,-0.4182,-0.002,-0.282,-0.1087,0.0473,-0.1073,-0.0512,0.021,-0.0847,-0.1608,-0.0919,0.0001,-0.005,-0.0214,-0.1183,0.0116]},{"n":"Santiago Hernán Solari Poggio","c":"Solari","g":25,"r":-0.33,"lo":-0.58,"hi":-0.04,"dJ":0.28,"s":[-0.1535,-0.0604,-0.097,-0.0124,0.135,0.0249,-0.1019,-0.1875,-0.1615,-0.0041,-0.1917,-0.0851,0.3902,-0.151,-0.0115,-0.0011,-0.055,-0.0756,0.2719,0.1763,-0.3401,0.2096,-0.242,-0.6201,-0.4622,-0.3836,-0.0269,0.1158,-0.2452,-0.0011,0.0685,-0.2142,-0.4457,-0.058]},{"n":"Ariel Enrique Holan","c":"Holan","g":32,"r":0.15,"lo":-0.12,"hi":0.42,"dJ":0.29,"s":[0.1813,0.5764,-0.0439,-0.0198,0.6879,-0.0263,0.1272,0.1352,-0.4273,-0.0452,0.0018,0.1054,-0.3798,-0.1212,0.0754,0.0003,-0.1703,0.0283,-0.2365,-0.0395,-0.3028,-0.2046,0.0044,-0.0892,0.0346,0.1601,-0.2296,-0.1279,-0.1037,-0.0002,-0.0023,-0.0515,-0.2895,0.0308]},{"n":"Domènec Torrent Font","c":"Torrent","g":34,"r":0.18,"lo":-0.11,"hi":0.44,"dJ":0.29,"s":[-0.1064,0.4572,0.0393,-0.0008,0.683,-0.0244,0.2205,0.0351,-0.2462,0.1369,0.0503,0.0257,0.053,-0.138,0.0047,-0.0006,-0.0222,0.0197,0.0765,-0.1008,-0.189,0.1381,0.0287,-0.2336,-0.0508,-0.2268,-0.0439,0.2461,-0.305,-0.0015,0.0326,0.0488,-0.0464,0.1146]},{"n":"Pablo Adrián Guede Barriero","c":"Guede","g":17,"r":-0.11,"lo":-0.33,"hi":0.15,"dJ":0.3,"s":[-0.2711,-0.4978,0.1403,-0.0041,-0.5409,-0.0619,-0.1444,-0.1024,0.1262,-0.127,0.0308,-0.0477,-0.4597,0.1295,-0.027,-0.0002,-0.077,-0.0444,-0.3056,-0.2114,0.5914,-0.0811,0.166,0.3759,0.4898,0.2501,0.0322,-0.0333,0.2037,-0.0007,0.2095,-0.0016,-0.1097,-0.0657]},{"n":"Gabriel Esteban Caballero Schiker","c":"Caballero","g":28,"r":0.12,"lo":-0.12,"hi":0.38,"dJ":0.3,"s":[0.2056,0.1212,-0.0991,-0.0115,0.0067,0.0294,0.067,0.0353,-0.4314,-0.0302,-0.1887,0.0467,0.2614,-0.0547,-0.0114,0.0,0.0195,0.0183,0.1843,-0.1106,-0.4839,0.3548,-0.1598,-0.447,-0.3339,-0.0601,-0.1507,0.21,-0.2141,-0.0006,-0.1078,0.0208,-0.2765,-0.0067]},{"n":"Veljko Paunovic","c":"Paunovic","g":61,"r":0.21,"lo":-0.01,"hi":0.44,"dJ":0.3,"s":[-0.1311,-0.0989,0.1628,-0.0415,-0.1279,-0.0249,0.098,0.0692,-0.2138,0.104,0.0605,-0.0056,0.1277,-0.0057,-0.0307,-0.0014,0.0015,-0.0447,0.289,-0.1239,0.4699,0.1825,0.2731,0.2884,0.3528,0.103,0.1112,0.1471,0.0322,-0.0005,-0.0155,-0.0711,-0.3155,0.024]},{"n":"Robert Dante Siboldi Badiola","c":"Siboldi","g":36,"r":-0.19,"lo":-0.43,"hi":0.02,"dJ":0.31,"s":[0.0504,0.3839,0.2383,-0.0058,0.5406,-0.0043,0.025,-0.0024,-0.1369,0.1209,-0.1417,0.0285,0.4446,-0.0591,0.0529,0.0002,-0.0472,0.0253,0.2897,-0.1407,0.085,-0.0279,0.2257,0.7124,0.2624,0.8081,0.1103,-0.0146,-0.0288,0.0001,0.1442,-0.0293,-0.2503,0.0598]},{"n":"Miguel Ernesto Herrera Aguirre","c":"Herrera","g":96,"r":-0.1,"lo":-0.34,"hi":0.1,"dJ":0.33,"s":[0.3149,0.1246,0.018,-0.0311,0.1139,0.0279,0.246,0.0338,-0.1443,0.0653,0.3049,0.0738,0.5316,0.0431,-0.0718,-0.0011,0.1329,0.0212,0.4747,-0.1097,0.2161,0.0063,0.294,0.6598,0.2692,0.5889,0.3088,0.0882,-0.057,-0.0009,0.0585,-0.0066,-0.0784,0.0742]},{"n":"Martin Anselmi","c":"Anselmi","g":37,"r":0.37,"lo":0.12,"hi":0.61,"dJ":0.37,"s":[0.1364,0.514,-0.3618,-0.0051,0.6109,0.0564,0.1378,0.0718,-0.3132,-0.1528,-0.5652,0.0647,0.0108,0.0351,-0.1179,-0.0002,0.0624,-0.0178,0.2303,-0.2168,-0.1786,0.3593,0.0894,0.114,0.4658,0.1034,-0.0626,0.1513,-0.4435,-0.0023,-0.2716,-0.1627,-0.4514,-0.1411]},{"n":"Juan Carlos Osorio Arbeláez","c":"Osorio","g":28,"r":0.17,"lo":-0.12,"hi":0.46,"dJ":0.58,"s":[0.3408,1.2231,-0.2657,-0.0365,1.0872,-0.0271,0.4609,0.3888,-0.3855,0.3581,0.3796,0.1606,-0.1856,0.0195,0.0223,0.0009,0.1809,0.1165,-0.0898,-0.8042,-0.1796,0.284,0.413,0.546,0.6563,0.7574,0.3014,0.1528,-0.7127,-0.0003,-0.6213,0.0587,-0.0553,0.0629]},{"n":"Manuel Eduardo Berizzo","c":"Berizzo","g":28,"r":0.29,"lo":0.05,"hi":0.55,"dJ":0.12,"s":[0.0619,-0.0872,-0.0299,0.0664,-0.0174,0.0743,-0.0847,-0.035,0.3363,-0.0696,-0.2495,0.0145,-0.0608,-0.1764,0.0372,0.0003,-0.0955,-0.0199,-0.1152,0.1966,0.0265,-0.3275,-0.2507,-0.1946,-0.0731,-0.3443,-0.2295,-0.2815,0.1061,0.0004,0.2236,-0.0661,0.1366,0.0492]},{"n":"Víctor Manuel Vucetich Rojas","c":"Vucetich","g":79,"r":0.08,"lo":-0.13,"hi":0.28,"dJ":0.13,"s":[0.0121,-0.3183,0.1833,-0.0159,-0.3049,0.1098,-0.167,-0.1225,0.1542,-0.089,-0.2591,-0.0109,-0.0889,-0.0336,-0.0006,-0.0006,-0.0725,-0.0187,-0.1456,0.3187,0.0877,-0.2164,-0.0665,0.0703,-0.2498,-0.0492,-0.0249,-0.1159,0.2753,-0.0002,0.2373,0.0118,0.1615,0.0224]},{"n":"Nicolás Ricardo Larcamón","c":"Larcamón","g":102,"r":0.44,"lo":0.24,"hi":0.62,"dJ":0.18,"s":[0.0234,0.0476,-0.2682,-0.0342,-0.1519,-0.0031,-0.1094,0.084,0.0152,0.0191,0.1932,-0.0079,-0.0231,0.0122,-0.0428,0.0005,0.1783,0.0228,0.0338,-0.2371,-0.027,-0.1688,-0.0884,-0.0361,0.1889,-0.0282,0.0977,-0.0119,-0.1768,0.0014,-0.2426,0.0038,0.0629,-0.0558]},{"n":"Jorge Guillermo Almada Álves","c":"Almada","g":136,"r":0.27,"lo":0.05,"hi":0.49,"dJ":0.27,"s":[0.0062,0.0164,-0.1171,-0.0515,-0.326,-0.1578,0.1511,0.1342,0.0428,0.2913,0.5461,0.0486,-0.0273,0.3587,-0.1468,0.0002,0.2543,0.0131,-0.0804,-0.301,0.2466,0.083,0.1995,0.0748,0.2831,-0.0478,0.1021,0.1024,0.0458,-0.0021,-0.5554,0.0982,0.36,0.0921]}],"k5":[{"k":"ppda","i":19,"nombre":"PPDA"},{"k":"contrapres","i":22,"nombre":"Contrapresiones"},{"k":"prog_prof","i":6,"nombre":"Progresiones profundas"},{"k":"xg_trans","i":31,"nombre":"xG en transición"},{"k":"compl_prof","i":7,"nombre":"Pases cerca del área"}]}</script>
+<script>
+(function(){
+const FD = JSON.parse(document.getElementById('datos').textContent);
+const T = FD.tec, FASES = FD.fases, K5 = FD.k5;
+const byN = {}; T.forEach(t => byN[t.n] = t);
+const J = 'André Soares Jardine', AL = 'Jorge Guillermo Almada Álves', LA = 'Nicolás Ricardo Larcamón', BE = 'Manuel Eduardo Berizzo', MO = 'Antonio Ricardo Mohamed Matijevich';
+const $ = id => document.getElementById(id);
+const sgn = v => (v > 0.0049 ? '+' : v < -0.0049 ? '−' : '') + Math.abs(v).toFixed(2);
+const d2 = v => v.toFixed(2), r1 = v => (v < 0 ? '−' : '') + Math.abs(v).toFixed(1);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const NS = 'http://www.w3.org/2000/svg';
+const COL = {ref:'var(--ink)', cons:'var(--sage)', ef:'var(--g)', agr:'var(--warm)'};
+const NOM = {ref:'Referencia', cons:'Conservador', ef:'Eficiente', agr:'Agresivo'};
+const ORD = ['cons','ef','agr'];
+const STAR = '<svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M6.00 0.00 L7.53 3.90 L11.71 4.15 L8.47 6.80 L9.53 10.85 L6.00 8.60 L2.47 10.85 L3.53 6.80 L0.29 4.15 L4.47 3.90Z" fill="var(--ink)"/></svg>';
+const se90 = t => (t.hi - t.lo) / 3.29;
+function phi(z){ const t = 1/(1+0.2316419*Math.abs(z)), d = 0.3989423*Math.exp(-z*z/2);
+  const p = d*t*(0.3193815+t*(-0.3565638+t*(1.781478+t*(-1.821256+t*1.330274)))); return z > 0 ? 1-p : p; }
+function rng(seed){ return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+
+// ---------- estado del modelo
+let lens = 'fases', minG = 15, ref = byN[J], sel = AL, budget = 0.27, A = null;
+function dist(a, b){
+  if (a.n === b.n) return 0;
+  if (lens === 'fases'){
+    if (b.n === J) return a.dJ; if (a.n === J) return b.dJ;
+    let tot = 0; for (const idx of FASES){ let s = 0; for (const i of idx){ const d = a.s[i] - b.s[i]; s += d*d; } tot += s / idx.length; }
+    return Math.sqrt(tot / FASES.length);
+  }
+  let s = 0; for (const k of K5){ const d = a.s[k.i] - b.s[k.i]; s += d*d; } return Math.sqrt(s / K5.length);
+}
+function analiza(){
+  const yR = ref.r;
+  const P = T.filter(t => t.n !== ref.n && t.g >= minG).map(t => ({t, x: dist(t, ref), y: t.r}));
+  const asc = P.slice().sort((a,b) => a.x - b.x || b.y - a.y);
+  const front = []; let best = yR;
+  for (const p of asc){ if (p.y > best + 1e-9){ front.push(p); best = p.y; } }
+  let claros = P.filter(p => p.t.lo > yR), firme = true;
+  if (!claros.length){ claros = P.filter(p => p.y > yR); firme = false; }
+  let ef = null, sMax = -Infinity;
+  for (const p of claros){ if (p.x < 0.02) continue; const s = (p.y - yR) / p.x; if (s > sMax) sMax = s; }
+  if (sMax > -Infinity) ef = claros.filter(p => p.x >= 0.02 && (p.y - yR)/p.x >= sMax*0.97).sort((a,b) => b.y - a.y)[0];
+  const cons = claros.slice().sort((a,b) => a.x - b.x)[0] || null;
+  const agr = ef ? (claros.filter(p => p.x > ef.x + 1e-9).sort((a,b) => b.t.g - a.t.g || b.y - a.y)[0] || null) : null;
+  const xMax = Math.max(0.3, Math.ceil(Math.max(...P.map(p => p.x)) * 10 - 1e-6) / 10);
+  return {yR, P, front, ef, cons, agr, sMax: sMax > -Infinity ? sMax : null, firme, xMax, claros: P.filter(p => p.t.lo > yR)};
+}
+const roles = n => ORD.filter(k => A[k] && A[k].t.n === n);
+const ptDe = n => n === ref.n ? {t: ref, x: 0, y: ref.r} : (A.P.find(p => p.t.n === n) || null);
+function mejorEn(b){ return A.P.filter(p => p.x <= b + 1e-9 && p.y > A.yR).sort((a,c) => c.y - a.y || a.x - c.x)[0] || null; }
+A = analiza();
+const pJ = n => ptDe(n);
+const ratio = n => { const p = pJ(n); return (p.y - A.yR) / p.x; };
+
+// ---------- gráfica
+const W = 800, H = 540, L = 62, R = 22, TP = 16, B = 50, Y0 = -0.4, Y1 = 0.65;
+const Y = v => TP + (Y1 - Math.max(Y0, Math.min(Y1, v))) / (Y1 - Y0) * (H - TP - B);
+let X = v => L + v / A.xMax * (W - L - R);
+const svg = document.createElementNS(NS, 'svg');
+svg.setAttribute('viewBox', `0 0 ${W} ${H}`); svg.setAttribute('preserveAspectRatio', 'xMidYMid meet'); svg.classList.add('ch'); svg.setAttribute('role', 'img');
+svg.innerHTML = `<defs><pattern id="hatch" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="7" stroke="var(--rule2)" stroke-width="1.2"/></pattern>
+  <marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="var(--warm)"/></marker></defs>
+  <g id="gAx"></g><g id="gZone" class="lay"></g><g id="gBud" class="lay"></g><g id="gRef" class="lay"></g><g id="gTan" class="lay"></g><g id="gFront" class="lay"></g><g id="gPts"></g><g id="gArr" class="lay"></g><g id="gLab"></g>`;
+$('svgwrap').appendChild(svg);
+const gPts = svg.querySelector('#gPts'), nodes = {};
+const rad = t => 2.8 + Math.sqrt(t.g) * 0.48;
+for (const t of T){
+  const g = document.createElementNS(NS, 'g'); g.classList.add('pt'); g.dataset.n = t.n;
+  g.innerHTML = `<line class="ci" x1="0" x2="0" y1="0" y2="0"/><circle class="ring" r="0"/><circle class="d" r="${rad(t).toFixed(2)}"/><path class="star" d="M0.00 -13.00 L3.29 -4.53 L12.36 -4.02 L5.33 1.73 L7.64 10.52 L0.00 5.60 L-7.64 10.52 L-5.33 1.73 L-12.36 -4.02 L-3.29 -4.53Z"/>`;
+  g.addEventListener('click', () => { if (g.classList.contains('click')) elegir(t.n); });
+  g.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && g.classList.contains('click')){ e.preventDefault(); elegir(t.n); } });
+  gPts.appendChild(g); nodes[t.n] = g;
+}
+const rnd = rng(7), cloud = {}, jit = {};
+T.forEach(t => { cloud[t.n] = [0.06 + rnd()*0.88, rnd()]; jit[t.n] = (rnd() - 0.5); });
+
+function ejes(modo){
+  X = v => L + v / A.xMax * (W - L - R);
+  let g = '';
+  if (modo === 'cloud'){ g += `<rect x="${L}" y="${TP}" width="${W-L-R}" height="${H-TP-B}" fill="none" stroke="var(--rule)" rx="8"/>`;
+    g += `<text x="${(L+W-R)/2}" y="${H-16}" text-anchor="middle" class="ax">Jardine y ${A.P.length} candidatos, sin ningún orden</text>`; }
+  else {
+    for (let v = -0.4; v <= Y1 + 1e-9; v = Math.round((v + 0.1)*10)/10){
+      g += `<line x1="${L}" x2="${W-R}" y1="${Y(v)}" y2="${Y(v)}" class="grid"${Math.abs(v)<1e-9?' stroke-width="1.6"':''}/>`;
+      g += `<text x="${L-8}" y="${Y(v)+4}" text-anchor="end" class="tk">${Math.abs(v)<1e-9?'0':(v>0?'+':'−')+Math.abs(v).toFixed(1)}</text>`; }
+    g += `<text transform="translate(16 ${(TP+H-B)/2}) rotate(-90)" text-anchor="middle" class="ax">Rendimiento histórico ajustado ↑ (retorno)</text>`;
+    if (modo === 'plane'){
+      for (let v = 0; v <= A.xMax + 1e-9; v = Math.round((v + 0.1)*10)/10){
+        g += `<line x1="${X(v)}" x2="${X(v)}" y1="${TP}" y2="${H-B}" class="grid" opacity=".5"/><text x="${X(v)}" y="${H-B+16}" text-anchor="middle" class="tk">${v.toFixed(1)}</text>`; }
+      g += `<text x="${(L+W-R)/2}" y="${H-10}" text-anchor="middle" class="ax">Distancia táctica respecto de ${esc(ref.c)} → (riesgo de cambio)</text>`;
+    } else g += `<text x="${(L+W-R)/2}" y="${H-14}" text-anchor="middle" class="ax">Todos en una columna: por ahora solo importa el retorno</text>`;
+  }
+  svg.querySelector('#gAx').innerHTML = g;
+}
+function capas(){
+  const F = A.front, top = Y(Y1), last = F.length ? F[F.length-1] : {x: 0, y: A.yR};
+  let poly = `${X(0)},${Y(A.yR)} ` + F.map((p, i) => `${X(p.x)},${Y(i ? F[i-1].y : A.yR)} ${X(p.x)},${Y(p.y)}`).join(' ') + ` ${X(A.xMax)},${Y(last.y)} ${X(A.xMax)},${top} ${X(0)},${top}`;
+  svg.querySelector('#gZone').innerHTML = `<polygon points="${poly}" fill="url(#hatch)" opacity=".6"/>
+    <text x="${X(0)+10}" y="${top+16}" class="zone"><tspan class="zt">INALCANZABLE</tspan><tspan x="${X(0)+10}" dy="14">nadie da tanto retorno</tspan><tspan x="${X(0)+10}" dy="13">con tan poco riesgo</tspan></text>
+    <text x="${W-R-8}" y="${H-B-10}" text-anchor="end" class="zone">Debajo de la línea: hay alguien con más retorno y menos riesgo</text>`;
+  svg.querySelector('#gRef').innerHTML = `<line x1="${L}" x2="${W-R}" y1="${Y(A.yR)}" y2="${Y(A.yR)}" class="refl"/><text x="${W-R-4}" y="${Y(A.yR)-7}" text-anchor="end" class="tk">retorno de ${esc(ref.c)} (${sgn(A.yR)}) · arriba de esta línea, mejora</text>`;
+  let f = '';
+  if (F.length){ f += `<path d="M${X(0)} ${Y(A.yR)} ${F.map(p => `H${X(p.x)} V${Y(p.y)}`).join(' ')}" class="front"/>`;
+    if (X(A.xMax) - X(last.x) > 30) f += `<line x1="${X(last.x)}" x2="${X(A.xMax)}" y1="${Y(last.y)}" y2="${Y(last.y)}" class="flat"/><text x="${X(A.xMax)-4}" y="${Y(last.y)-7}" text-anchor="end" class="zone" style="font-style:normal">más riesgo ya no da más retorno</text>`; }
+  svg.querySelector('#gFront').innerHTML = f;
+  let tn = '';
+  if (A.ef && A.sMax){ let x2 = A.xMax, y2 = A.yR + A.sMax*x2; if (y2 > Y1){ y2 = Y1; x2 = (Y1 - A.yR)/A.sMax; }
+    tn = `<line x1="${X(0)}" y1="${Y(A.yR)}" x2="${X(x2)}" y2="${Y(y2)}" class="tan"/>`; }
+  svg.querySelector('#gTan').innerHTML = tn;
+  const a = ptDe(AL), b = ptDe(LA);
+  svg.querySelector('#gArr').innerHTML = a && b && ref.n === J ? `<path d="M${X(a.x)-12} ${Y(a.y)-10} Q ${X((a.x+b.x)/2)+10} ${Y(b.y)+6} ${X(b.x)+14} ${Y(b.y)+6}" class="arrow" marker-end="url(#ah)"/>
+    <text x="${X(a.x)}" y="${Y(a.y)+30}" text-anchor="middle" class="lab k" style="fill:var(--warm)">Larcamón: menos riesgo, más retorno</text>` : '';
+}
+function bud(){
+  const xb = X(Math.min(budget, A.xMax)), bb = mejorEn(budget);
+  svg.querySelector('#gBud').innerHTML = `<rect x="${L}" y="${TP}" width="${Math.max(0, xb-L)}" height="${H-TP-B}" class="budz"/><line x1="${xb}" x2="${xb}" y1="${TP}" y2="${H-B}" class="budl"/>`;
+  $('budT').textContent = `Presupuesto de riesgo: ${d2(budget)}` + (bb ? ` · el mejor: ${bb.t.c} (${sgn(bb.y)})` : ` · nadie mejora a ${ref.c}`);
+}
+
+// cfg: modo, capas:[], k:{n:kind}, dim, labels:{n:text}, ci:[n], click, ring:[n]
+let cfg = {};
+function pinta(){
+  ejes(cfg.modo); capas(); bud();
+  ['gZone','gRef','gFront','gTan','gArr','gBud'].forEach(id => svg.querySelector('#'+id).classList.toggle('off', !(cfg.capas||[]).includes(id)));
+  const front = new Set(A.front.map(p => p.t.n));
+  for (const t of T){
+    const g = nodes[t.n]; let p = t.n === ref.n ? {t, x: 0, y: t.r} : A.P.find(q => q.t.n === t.n);
+    const vis = !!p || cfg.modo === 'cloud';
+    g.style.opacity = vis ? 1 : 0; g.style.pointerEvents = vis ? '' : 'none';
+    let x, y;
+    if (cfg.modo === 'cloud'){ x = L + cloud[t.n][0]*(W-L-R); y = TP + 10 + cloud[t.n][1]*(H-TP-B-20); }
+    else if (cfg.modo === 'strip'){ x = (L + W - R)/2 + jit[t.n]*120; y = Y(t.r); }
+    else if (p){ x = X(p.x); y = Y(p.y); } else { x = X(0); y = Y(t.r); }
+    g.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px)`;
+    let k = (cfg.k && cfg.k[t.n]) || '';
+    if (!k && cfg.frontK && front.has(t.n)) k = 'front';
+    g.dataset.k = k;
+    g.classList.toggle('dim', !!cfg.dim && !k);
+    g.classList.toggle('click', !!cfg.click && vis);
+    g.setAttribute('tabindex', cfg.click && vis ? '0' : '-1');
+    g.classList.toggle('cion', (cfg.ci||[]).includes(t.n));
+    const ci = g.querySelector('.ci'); ci.setAttribute('y1', (Y(t.hi) - Y(t.r)).toFixed(1)); ci.setAttribute('y2', (Y(t.lo) - Y(t.r)).toFixed(1));
+    g.querySelector('.ring').setAttribute('r', (cfg.ring||[]).includes(t.n) ? (rad(t)+5).toFixed(1) : 0);
+    const xx = p ? p.x : null;
+    g.dataset.tip = cfg.modo === 'cloud' ? '' : `<b>${esc(t.n)}</b><br>Retorno ${sgn(t.r)} (${sgn(t.lo)} a ${sgn(t.hi)})${cfg.modo === 'plane' && xx != null ? `<br>Riesgo ${d2(xx)}` : ''}<br>${t.g} partidos${t.r < Y0 ? '<br>Fuera de escala: su retorno real está más abajo' : ''}`;
+    g.setAttribute('aria-label', `${t.c}: retorno ${sgn(t.r)}${xx != null ? ', riesgo ' + d2(xx) : ''}`);
+  }
+  etiquetas();
+  svg.setAttribute('aria-label', $('vizT').textContent || 'Gráfica de técnicos');
+}
+function etiquetas(){
+  const boxes = [], out = [], plot = {x0: L, x1: W-R, y0: TP, y1: H-B};
+  const want = Object.entries(cfg.labels || {});
+  if (cfg.autoLab) for (const p of A.front) if (!cfg.labels || !(p.t.n in cfg.labels)) want.push([p.t.n, p.t.c, 1]);
+  for (const [n, txt, menor] of want){
+    const t = byN[n]; if (!t) continue; const tr = nodes[n].style.transform.match(/translate\(([-\d.]+)px, ([-\d.]+)px\)/); if (!tr) continue;
+    if (nodes[n].style.opacity === '0') continue;
+    const cx = +tr[1], cy = +tr[2], rr = rad(t) + 4, cls = menor ? '' : 'k', tw = txt.length * (menor ? 6.3 : 7.4) + 4, th = 14;
+    for (const [tx, ty, an] of (n === ref.n ? [[cx+rr+2, cy+rr+12, 'start'], [cx+rr+2, cy-rr-4, 'start'], [cx+rr+2, cy+4, 'start']] : (cfg.modo === 'plane' && (cfg.capas||[]).includes('gFront') && A.front.some(q => q.t.n === n)) ? [[cx-rr-2, cy+4, 'end'], [cx, cy-rr-6, 'middle'], [cx+rr+2, cy+4, 'start'], [cx, cy+rr+14, 'middle']] : [[cx+rr+2, cy+4, 'start'], [cx-rr-2, cy+4, 'end'], [cx, cy-rr-6, 'middle'], [cx, cy+rr+14, 'middle']])){
+      const x0 = an === 'start' ? tx : an === 'end' ? tx - tw : tx - tw/2, b = {x0, x1: x0+tw, y0: ty-th+3, y1: ty+3};
+      if (b.x0 < plot.x0 || b.x1 > plot.x1 || b.y0 < plot.y0 || b.y1 > plot.y1) continue;
+      if (boxes.some(o => !(b.x1 < o.x0 || b.x0 > o.x1 || b.y1 < o.y0 || b.y0 > o.y1))) continue;
+      boxes.push(b); out.push(`<text x="${tx.toFixed(1)}" y="${ty.toFixed(1)}" text-anchor="${an}" class="lab ${cls}">${esc(txt)}</text>`); break;
+    }
+  }
+  svg.querySelector('#gLab').innerHTML = out.join('');
+}
+function leyenda(items){
+  const m = {ref:`<span>${STAR}Referencia</span>`, hi:`<span><i style="background:var(--ink2);box-shadow:0 0 0 1.5px var(--ink)"></i>Destacado</span>`,
+    front:`<span class="ln-w"><i class="ln" style="width:20px;height:0;border-radius:0;border-top:3px solid var(--g);background:none"></i>Frontera eficiente</span>`,
+    tan:`<span><i style="width:20px;height:0;border-radius:0;border-top:1.6px dashed var(--ink2);background:none"></i>Mejor retorno por riesgo</span>`,
+    cons:`<span><i style="background:var(--sage)"></i>Conservador</span>`, ef:`<span><i style="background:var(--g)"></i>Eficiente</span>`, agr:`<span><i style="background:var(--warm)"></i>Agresivo</span>`,
+    otros:`<span><i style="background:var(--dot)"></i>Otros técnicos</span>`, tam:`<span>Tamaño = partidos dirigidos</span>`};
+  $('leg').innerHTML = items.map(k => m[k] || '').join('');
+}
+
+// ---------- piezas de texto
+function k5bars(n){
+  const t = byN[n], ds = K5.map(k => ({k, d: t.s[k.i] - ref.s[k.i]})), ext = Math.max(0.8, ...ds.map(x => Math.abs(x.d)));
+  const TXT = {ppda:['Deja jugar más al rival','Presiona antes'], contrapres:['Contrapresiona más','Contrapresiona menos'], prog_prof:['Llega más al último tercio','Llega menos al último tercio'], xg_trans:['Más peligro al contragolpe','Menos peligro al contragolpe'], compl_prof:['Más pases cerca del área','Menos pases cerca del área']};
+  return `<div class="k5">` + ds.map(({k, d}) => { const w = Math.abs(d)/ext*50, lo = Math.abs(d) < 0.1;
+    return `<div class="k5r" data-tip="<b>${esc(k.nombre)}</b><br>${sgn(d)} desviaciones frente a ${esc(ref.c)}, netas de calidad"><span class="n">${esc(k.nombre)}</span><span class="k5b"><i class="${lo?'lo':''}" style="${d >= 0 ? 'left:50%' : 'right:50%'};width:${w.toFixed(1)}%"></i></span><span class="t">${lo ? 'Parecido' : (d > 0 ? TXT[k.k][0] : TXT[k.k][1])}</span></div>`; }).join('') + `</div>`;
+}
+function tarjeta(n){
+  const p = n ? ptDe(n) : null, bb = mejorEn(budget);
+  if (!p) return `<div class="box card"><p class="tag">Tu presupuesto</p><div class="who"><b>Nadie mejora a ${esc(ref.c)}</b></div><p>Con un riesgo de hasta ${d2(budget)} ningún candidato da más retorno que la referencia. Mueve la barra a la derecha.</p></div>`;
+  if (p.t.n === ref.n) return `<div class="box card"><p class="tag">${STAR}Referencia</p><div class="who"><b>${esc(p.t.c)}</b><span>${esc(p.t.n)} · ${p.t.g} partidos</span></div><p>Riesgo cero por definición. Retorno ${sgn(p.y)} (${sgn(p.t.lo)} a ${sgn(p.t.hi)}).</p></div>`;
+  const rr = roles(p.t.n), k = rr[rr.length-1], rat = (p.y - A.yR)/p.x, prob = phi((p.y - A.yR)/Math.sqrt(se90(p.t)**2 + se90(ref)**2));
+  const dom = A.P.filter(q => q.x < p.x - 1e-9 && q.y > p.y + 1e-9).sort((a,b) => b.y - a.y);
+  const li = [];
+  li.push(A.front.includes(p) ? '<b>Sobre la frontera:</b> nadie da más retorno con menos riesgo.' : dom.length ? `<b>Debajo de la frontera:</b> ${dom.length > 2 ? `${dom.length} candidatos dan más retorno con menos riesgo, entre ellos ${dom.slice(0,2).map(q => esc(q.t.c)).join(' y ')}` : `${dom.slice(0,2).map(q => esc(q.t.c)).join(' y ')} ${dom.length > 1 ? 'dan' : 'da'} más retorno con menos riesgo`}.` : '');
+  li.push(p.t.lo > A.yR ? `Su intervalo completo queda arriba del retorno de ${esc(ref.c)}.` : `Su intervalo toca el retorno de ${esc(ref.c)}: la mejora no es segura.`);
+  if (bb && bb.t.n !== p.t.n) li.push(`Con un riesgo de hasta ${d2(budget)}, el de más retorno es <b>${esc(bb.t.c)}</b> (${sgn(bb.y)}).`);
+  return `<div class="box card"><p class="tag"><i style="background:${k ? COL[k] : 'var(--ink3)'}"></i>${rr.length ? rr.map(x => NOM[x]).join(' y ') : 'Tu elección'}</p>
+    <div class="who"><b>${esc(p.t.c)}</b><span>${esc(p.t.n)} · ${p.t.g} partidos</span></div>
+    <div class="big"><div><span>Retorno</span><b>${sgn(p.y)}</b><small>${sgn(p.t.lo)} a ${sgn(p.t.hi)}</small></div><div><span>Riesgo</span><b>${d2(p.x)}</b><small>0 = como ${esc(ref.c)}</small></div><div><span>Retorno / riesgo</span><b>${p.y > A.yR ? r1(rat) : '—'}</b><small>${A.ef ? 'mejor: ' + r1(A.sMax) : ''}</small></div><div><span>Rinde más</span><b>${prob > 0.99 ? 'más de 99' : prob < 0.01 ? 'menos de 1' : Math.round(prob*100)}%</b><small>probabilidad aprox.</small></div></div>
+    <ul>${li.filter(Boolean).map(x => `<li>${x}</li>`).join('')}</ul></div>`;
+}
+const pensar = (q, a) => `<div class="think"><p class="q">${q}</p><button type="button" class="rev">Ver respuesta</button><p class="a" hidden>${a}</p></div>`;
+
+// ---------- pasos
+const nJ = A.P.length, nArriba = A.P.filter(p => p.y > A.yR).length, nClaros = A.claros.length;
+const tabla = [BE, LA, MO, AL].map(n => ({n, c: byN[n].c, x: ptDe(n).x, y: ptDe(n).y, s: ratio(n)}));
+const smax = Math.max(...tabla.map(r => r.s));
+const PASOS = [
+ { t: 'Portada', viz: '', portada: true, html: () => '',
+   cfg: {modo:'cloud', capas:[]}, leg: [] },
+ { t: 'El reto', viz: 'Los técnicos disponibles', html: () => `
+    <p class="kick">Paso 1 · El reto</p>
+    <h2>¿Cómo dar continuidad a una etapa de éxitos?</h2>
+    <p>Después de una etapa de éxitos, elegir al siguiente entrenador exige decidir qué conservar y qué transformar. Tomamos a Jardine como caso de estudio para explorar esa decisión con datos.</p>
+    <p>Además de Jardine, hay ${nJ} candidatos con al menos 15 partidos de temporada regular en la Liga MX entre 2021 y 2025, cada uno con resultados, estilo e historial distintos. Sin un criterio común, la lista es esto: una nube de puntos.</p>
+    <p>La idea viene de las finanzas. Harry Markowitz (Nobel de Economía, 1990) propuso mirar cada inversión con dos números a la vez: su retorno, lo que rinde, y su riesgo, qué tanto se puede mover. Aquí el retorno son los puntos extra de cada técnico y el riesgo, cuánto tendría que cambiar el estilo del equipo.</p>
+    <p><b>Vamos a hacer lo mismo con los técnicos.</b></p>`,
+   cfg: {modo:'cloud', capas:[]}, leg: [] },
+ { t: 'Retorno', viz: 'Primer número: el retorno', html: () => `
+    <p class="kick">Paso 2 · Primer número</p>
+    <h2>Retorno: cuántos puntos saca un técnico por encima de lo esperado</h2>
+    <p>Ganar con el América no es lo mismo que ganar con un club del fondo de la tabla. Para comparar entrenadores en contextos distintos, el modelo toma en cuenta el club, la temporada y si jugaron de local o visitante. Así estima cuánto se apartó su rendimiento de lo esperado en ese contexto.</p>
+    <p>A esa medida la llamamos <b>rendimiento histórico ajustado</b>, y es el retorno de cada técnico. La línea punteada marca su rango probable: entre más corta, más seguro el dato. Es un antecedente para comparar, no una promesa de puntos al contratar.</p>
+    <div class="big"><div><span>Jardine</span><b>${sgn(byN[J].r)}</b><small>cerca de lo esperado</small></div><div><span>Almada</span><b>${sgn(byN[AL].r)}</b><small>por partido</small></div><div><span>Larcamón</span><b>${sgn(byN[LA].r)}</b><small>el más alto</small></div></div>
+    ${pensar('Si solo viéramos este número, ¿a quién contrataríamos?', `A Larcamón. Pero un inversionista no compra solo por retorno; también pregunta cuánto riesgo trae. Falta el segundo número.`)}`,
+   cfg: {modo:'strip', capas:[], k:{[J]:'ref',[AL]:'hi',[LA]:'hi'}, dim:true, labels:{[J]:'Jardine',[AL]:'Almada',[LA]:'Larcamón'}, ci:[J,AL,LA]}, leg: ['ref','hi','otros','tam'] },
+ { t: 'Riesgo', viz: 'Segundo número: el riesgo', html: () => `
+    <p class="kick">Paso 3 · Segundo número</p>
+    <h2>Riesgo: cuánto tendría que cambiar el equipo</h2>
+    <p>Cada técnico trae su forma de jugar. Usamos el estilo observado con Jardine como referencia para comparar otras propuestas.</p>
+    <p>Medimos qué tan distinto juega cada candidato en seis fases del juego, de la salida con balón al contragolpe, descontando la calidad de su equipo. A ese número lo llamamos <b>distancia táctica</b>, y es el riesgo: cero es jugar igual que Jardine.</p>
+    <div class="box"><h3>Almada frente a Jardine · 5 métricas clave</h3>${k5bars(AL)}</div>
+    <p>Almada presiona mucho antes, contrapresiona más y llega más al último tercio. Su riesgo es ${d2(ptDe(AL).x)}, más del doble que el de Berizzo (${d2(ptDe(BE).x)}). Para dar escala: un técnico con el estilo promedio de la liga quedaría a unos 0.14 de Jardine.</p>`,
+   cfg: {modo:'plane', capas:[], k:{[J]:'ref',[AL]:'hi',[LA]:'hi',[BE]:'hi'}, dim:true, labels:{[J]:'Jardine',[AL]:'Almada',[LA]:'Larcamón',[BE]:'Berizzo'}}, leg: ['ref','hi','otros','tam'] },
+ { t: 'Punto de partida', viz: 'El punto de partida', html: () => `
+    <p class="kick">Paso 4 · El punto de partida</p>
+    <h2>Jardine es el punto de partida: riesgo cero</h2>
+    <p>Su retorno (rendimiento histórico ajustado) es ${sgn(byN[J].r)} puntos por partido: una estimación cercana a lo esperado según club, temporada y localía. Su rango probable (intervalo al 90%), de ${sgn(byN[J].lo)} a ${sgn(byN[J].hi)}, muestra la incertidumbre de esa estimación.</p>
+    <p>Como es la referencia, su riesgo es cero. La línea punteada marca su retorno: ${nArriba} de los ${nJ} candidatos quedan arriba, y solo ${nClaros} lo superan con su intervalo completo. Los de abajo rinden menos que la referencia.</p>`,
+   cfg: {modo:'plane', capas:['gRef'], k:{[J]:'ref'}, labels:{[J]:'Jardine (referencia)'}, ci:[J], dim:true}, leg: ['ref','otros'] },
+ { t: 'Frontera', viz: 'La frontera eficiente', html: () => `
+    <p class="kick">Paso 5 · La frontera eficiente</p>
+    <h2>Un candidato queda superado si otro da más retorno con menos riesgo</h2>
+    <p>Comparen a Almada con Larcamón. Larcamón cambia menos el estilo (${d2(ptDe(LA).x)} contra ${d2(ptDe(AL).x)}) y da más retorno (${sgn(byN[LA].r)} contra ${sgn(byN[AL].r)}). Con solo estos dos números, Larcamón supera a Almada.</p>
+    <p>Si quitamos a todos los superados, quedan los que nadie supera: la frontera eficiente. Con Jardine de referencia son ${A.front.length} de ${nJ}: ${A.front.map(p => p.t.c).join(' y ')}. La frontera tiene forma de escalera porque comparamos entrenadores concretos, no combinaciones de ellos.</p>
+    <p>Estar fuera no prueba que alguien sea peor técnico: la frontera ordena estimaciones y los intervalos se enciman.</p>
+    <details><summary>¿Por qué no es una curva como la del libro?</summary><p>En el libro puedes poner 60% en una acción y 40% en otra, y al mezclar activos que no se mueven igual el riesgo baja. Eso dibuja una curva continua. Un técnico no se divide: no se puede contratar 60% Larcamón y 40% Berizzo. Por eso la frontera es una escalera que une candidatos reales. Si se pudieran mezclar técnicos, los escalones se suavizarían hasta la curva del libro. Es el mismo principio, en versión discreta.</p></details>`,
+   cfg: {modo:'plane', capas:['gRef','gZone','gFront','gArr'], k:{[J]:'ref',[AL]:'hi'}, frontK:true, dim:true, labels:{[J]:'Jardine',[AL]:'Almada',[BE]:'Berizzo',[LA]:'Larcamón'}, autoLab:true}, leg: ['ref','front','hi','otros'] },
+ { t: 'Retorno por riesgo', viz: 'Retorno adicional por unidad de riesgo', html: () => `
+    <p class="kick">Paso 6 · Retorno por unidad de riesgo</p>
+    <h2>¿Qué candidato ofrece más retorno adicional por unidad de riesgo?</h2>
+    <p>Comparamos la diferencia de retorno estimado frente a Jardine con el riesgo de cada candidato. Entre más inclinada la línea desde Jardine, más retorno da cada unidad de riesgo.</p>
+    <div class="box"><table class="tbl"><thead><tr><th>Técnico</th><th>Retorno adicional</th><th>Riesgo</th><th>Retorno por riesgo</th></tr></thead><tbody>
+      ${tabla.map(r => `<tr class="${r.s >= smax*0.97 ? 'hl' : ''}"><td>${esc(r.c)}</td><td>${sgn(r.y - A.yR)}</td><td>${d2(r.x)}</td><td><span class="bar" style="width:${(r.s/smax*60).toFixed(0)}px"></span>${r1(r.s)}</td></tr>`).join('')}
+    </tbody></table></div>
+    ${pensar('Berizzo y Larcamón empatan en 2.5. ¿Por qué la herramienta marca a Larcamón como el eficiente?', `Porque con la misma relación entre retorno y riesgo, Larcamón da más retorno en total (${sgn(byN[LA].r)} contra ${sgn(byN[BE].r)}). Almada da ${r1(ratio(AL))} por unidad de riesgo: menos de la mitad.`)}`,
+   cfg: {modo:'plane', capas:['gRef','gZone','gFront','gTan'], k:{[J]:'ref',[AL]:'hi',[MO]:'hi'}, frontK:true, dim:true, labels:{[J]:'Jardine',[BE]:`Berizzo · ${r1(ratio(BE))}`,[LA]:`Larcamón · ${r1(ratio(LA))}`,[AL]:`Almada · ${r1(ratio(AL))}`,[MO]:`Mohamed · ${r1(ratio(MO))}`}}, leg: ['ref','front','tan','otros'] },
+ { t: 'Objetivo del club', viz: 'Tu apetito de riesgo', interactivo: true, html: () => `
+    <p class="kick">Paso 7 · El objetivo del club</p>
+    <h2>La elección depende del objetivo del club y del riesgo que acepta</h2>
+    <p>La directiva define qué quiere conservar y cuánto está dispuesta a modificar la propuesta de juego. La herramienta compara las alternativas dentro de ese margen.</p>
+    <p>Toquen un perfil o muevan la barra debajo de la gráfica para fijar cuánto riesgo acepta el club.</p>
+    <div class="profs" id="profs"></div>
+    <div id="card"></div>`,
+   cfg: {modo:'plane', capas:['gRef','gZone','gFront','gTan','gBud'], roles:true, frontK:true, click:true}, leg: ['ref','cons','ef','agr','front'] },
+ { t: 'Ahora ustedes', viz: '', interactivo: true, libre: true, html: () => `
+    <p class="kick">Paso 8 · Ahora ustedes</p>
+    <h2>Elijan a cualquier técnico como punto de partida</h2>
+    <p>La lógica sirve para cualquier club. Al cambiar la referencia, la frontera se rearma y los puntos solo se mueven de lado: en este modelo, el retorno de un técnico no depende de a quién reemplaza.</p>
+    <div class="box ctrl">
+      <label>Referencia<select id="cRef"></select></label>
+      <div class="row2"><label>Riesgo medido en<div class="seg" id="cLens"><button type="button" data-l="fases">Seis fases</button><button type="button" data-l="k5">5 métricas</button></div></label>
+      <label>Partidos mínimos<div class="seg" id="cMin"><button type="button" data-g="15">15</button><button type="button" data-g="30">30</button><button type="button" data-g="60">60</button></div></label></div>
+    </div>
+    <div class="profs" id="profs"></div>
+    <div id="card"></div>
+    <div class="box" id="k5box"></div>
+    <div class="box"><h3>Lo que el modelo todavía no incluye</h3><p>Costo de contratación y salida, disponibilidad contractual, encaje con la plantilla, necesidades de fichajes y capacidad para gestionar el vestidor. La frontera ordena las opciones; la decisión sigue siendo del club.</p></div>
+    <div class="box g"><h3>Lo que sigue</h3><p>Hoy la herramienta compara antecedentes de partidos. Con información del club sobre salarios, contratos, disponibilidad y plantilla, podría incorporar el costo financiero de sustituir al técnico y las necesidades de adaptación del equipo. El siguiente paso es ampliar y validar el modelo para apoyar decisiones en otros clubes y contextos.</p></div>
+    <div class="links"><a href="herramienta_reemplazo.html" target="_blank" rel="noopener">Abrir la herramienta completa de reemplazo →</a><a href="https://franrz7.github.io/ISAC2026/" target="_blank" rel="noopener">Reporte completo: franrz7.github.io/ISAC2026</a><a href="https://franrz7.github.io/ISAC2026/expediente_tecnicos.html" target="_blank" rel="noopener">Expediente de técnicos, con las 43 métricas</a></div>
+    <details><summary>Notas técnicas</summary>
+      <p>Datos de StatsBomb, temporada regular, rango oficial 2021/22 a 2024/25. Retorno: puntos por partido sobre lo esperado por club, temporada y localía, con intervalo de 90% (modelo ajustado del reporte). Riesgo: distancia de estilo en seis fases (34 métricas), neta de la calidad del equipo con una regresión sobre el xGD de 68 tramos técnico-club y encogida según los partidos de cada técnico; con Jardine se usan las distancias del reporte y con otra referencia se calculan aquí (correlación de 0.95).</p>
+      <p>Las 5 métricas clave son PPDA, contrapresiones, progresiones profundas y xG en transición (las que más persisten cuando un técnico cambia de club, correlación de 0.51 a 0.60 en 15 técnicos) y pases completados cerca del área (la más asociada con los puntos dentro de un mismo club). Medido con ellas, el riesgo tiene una correlación de 0.79 con el de seis fases.</p>
+      <p>Conservador: el más parecido a la referencia cuyo intervalo queda arriba de su retorno. Eficiente: mayor retorno adicional por unidad de riesgo; si dos quedan a menos de 3%, el de más retorno. Agresivo: entre los que cambian el estilo más que el eficiente y tienen su intervalo arriba de la referencia, el de más partidos. Más partidos no lo vuelve más eficiente: es un tercer criterio. La probabilidad de rendir más es una aproximación normal con los dos intervalos, tratados como independientes. El retorno por unidad de riesgo es análogo a la razón de Sharpe, con una diferencia: aquí el riesgo es una distancia de estilo, no la volatilidad. Entre los 49 candidatos, retorno y riesgo casi no se relacionan (correlación de 0.13); por eso hay opciones que superan a otras en los dos números.</p>
+    </details>`,
+   cfg: {modo:'plane', capas:['gRef','gZone','gFront','gTan','gBud'], roles:true, frontK:true, click:true}, leg: ['ref','cons','ef','agr','front'] }
+];
+
+// ---------- interacción de los pasos 7 y 8
+function rolesCfg(c){
+  const k = {[ref.n]:'ref'}; ORD.forEach(r => { if (A[r]) k[A[r].t.n] = k[A[r].t.n] || r; });
+  const labels = {[ref.n]: ref.c + ' (referencia)'}; ORD.forEach(r => { if (A[r]) labels[A[r].t.n] = A[r].t.c; });
+  const bb = mejorEn(budget); if (c.click && sel && !k[sel]) k[sel] = 'hi';
+  if (c.click){ if (sel) labels[sel] = (ptDe(sel)||{t:byN[sel]}).t.c; if (bb) labels[bb.t.n] = bb.t.c; }
+  return Object.assign({}, c, {k, labels, autoLab: true, ci: ORD.map(r => A[r] && A[r].t.n).filter(Boolean).concat(sel ? [sel] : []), ring: c.click ? [sel, bb && bb.t.n].filter(Boolean) : []});
+}
+function perfiles(){
+  const box = $('profs'); if (!box) return;
+  const txt = {cons: A.firme ? 'Conserva el estilo; su rango queda arriba' : 'Conserva el estilo y rinde más', ef:'Más retorno por cada unidad de riesgo', agr:'Cambia más el estilo; entre esos, el de más partidos'};
+  box.innerHTML = ORD.map(k => { const p = A[k];
+    return p ? `<button type="button" class="prof" data-n="${esc(p.t.n)}" style="--c:${COL[k]}" aria-pressed="${p.t.n === sel}"><span>${NOM[k]}</span><b>${esc(p.t.c)}</b><small>Riesgo ${d2(p.x)} · retorno ${sgn(p.y)}</small><small>${txt[k]}</small></button>`
+      : `<div class="prof" style="--c:var(--rule2);cursor:default"><span>${NOM[k]}</span><small>Nadie cumple la regla con esta referencia.</small></div>`; }).join('');
+  box.querySelectorAll('button.prof').forEach(b => b.addEventListener('click', () => elegir(b.dataset.n)));
+}
+function refrescaInter(){
+  const paso = PASOS[cur]; if (!paso.interactivo) return;
+  cfg = rolesCfg(paso.cfg); pinta(); perfiles();
+  const c = $('card'); if (c) c.innerHTML = tarjeta(sel);
+  const kb = $('k5box'); if (kb) kb.innerHTML = sel && sel !== ref.n ? `<h3>Dónde está el riesgo de ${esc(ptDe(sel) ? ptDe(sel).t.c : '')} · 5 métricas clave</h3>${k5bars(sel)}` : `<h3>5 métricas clave</h3><p>Elige un candidato para ver en qué cambia frente a ${esc(ref.c)}.</p>`;
+  if (paso.libre) $('vizT').textContent = `Frontera con ${ref.c} de referencia`;
+}
+function elegir(n){ sel = n; const p = ptDe(n); if (p && n !== ref.n) budget = p.x; $('bud').value = budget; refrescaInter(); }
+function porDefecto(){
+  const pref = ref.n === J && A.P.some(p => p.t.n === AL) ? AL : (A.agr || A.ef || A.cons || {t:{}}).t.n;
+  if (pref){ sel = pref; budget = ptDe(pref).x; } else { sel = null; budget = A.xMax / 2; }
+  $('bud').max = A.xMax; $('bud').value = budget;
+}
+$('bud').addEventListener('input', e => { budget = +e.target.value; const b = mejorEn(budget); sel = b ? b.t.n : null; refrescaInter(); });
+document.querySelectorAll('.demo button').forEach(btn => btn.addEventListener('click', () => {
+  if (btn.dataset.b === 'agr'){ if (A.agr) elegir(A.agr.t.n); return; }
+  budget = +btn.dataset.b; $('bud').value = budget; const b = mejorEn(budget); sel = b ? b.t.n : null; refrescaInter(); }));
+function montaLibre(){
+  const caso = [J, AL, LA].map(n => byN[n]).concat(T.filter(t => /^Fernando .*Ortiz/.test(t.n)).slice(0,1)).filter(Boolean);
+  const rest = T.slice().sort((a,b) => a.n.localeCompare(b.n, 'es'));
+  const s = $('cRef'); s.innerHTML = `<optgroup label="Del caso">${caso.map(t => `<option value="${esc(t.n)}">${esc(t.n)}</option>`).join('')}</optgroup><optgroup label="Todos los técnicos">${rest.map(t => `<option value="${esc(t.n)}">${esc(t.n)}</option>`).join('')}</optgroup>`;
+  s.value = ref.n;
+  s.addEventListener('change', () => { ref = byN[s.value]; A = analiza(); porDefecto(); refrescaInter(); });
+  const segs = (id, attr, get, set) => { const box = $(id); box.querySelectorAll('button').forEach(b => { b.setAttribute('aria-pressed', String(b.dataset[attr] === String(get())));
+    b.addEventListener('click', () => { set(b.dataset[attr]); box.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', String(x === b))); A = analiza(); if (!ptDe(sel)) porDefecto(); else if (sel !== ref.n){ budget = ptDe(sel).x; $('bud').max = A.xMax; $('bud').value = budget; } refrescaInter(); }); }); };
+  segs('cLens', 'l', () => lens, v => lens = v); segs('cMin', 'g', () => minG, v => minG = +v);
+}
+
+// ---------- navegación
+let cur = 0;
+$('dots').innerHTML = PASOS.map((p, i) => `<button type="button" title="${esc(p.t)}" aria-label="Paso ${i}: ${esc(p.t)}">${i === 0 ? '●' : i}</button>`).join('');
+$('dots').querySelectorAll('button').forEach((b, i) => b.addEventListener('click', () => ir(i)));
+function ir(i){
+  i = Math.max(0, Math.min(PASOS.length - 1, i));
+  const deLibre = PASOS[cur] && PASOS[cur].libre && i !== cur;
+  cur = i; const p = PASOS[i];
+  document.querySelector('.app').classList.toggle('is-cover', !!p.portada);
+  if (!p.libre && (deLibre || ref.n !== J || lens !== 'fases' || minG !== 15)){ ref = byN[J]; lens = 'fases'; minG = 15; A = analiza(); }
+  if (p.interactivo && (i === 7 || deLibre || !sel)) porDefecto();
+  const tx = $('txt'); tx.classList.remove('in'); void tx.offsetWidth; tx.innerHTML = p.html(); tx.classList.add('in'); tx.scrollTop = 0;
+  tx.querySelectorAll('.rev').forEach(b => b.addEventListener('click', () => { b.nextElementSibling.hidden = false; b.hidden = true; }));
+  $('vizT').textContent = p.viz; leyenda(p.leg);
+  $('sl').hidden = !p.interactivo;
+  $('vizF').textContent = p.cfg.modo === 'cloud' ? '' : 'Fuente: StatsBomb, Liga MX, temporada regular 2021/22 a 2024/25. Pasa el cursor sobre un punto para ver al técnico.';
+  if (p.libre) montaLibre();
+  if (p.interactivo) refrescaInter(); else { cfg = p.cfg.roles ? rolesCfg(p.cfg) : p.cfg; pinta(); }
+  $('prev').disabled = i === 0; $('next').disabled = i === PASOS.length - 1;
+  $('dots').querySelectorAll('button').forEach((b, j) => { b.toggleAttribute('aria-current', j === i); if (j === i) b.setAttribute('aria-current', 'step'); b.classList.toggle('done', j < i); });
+  $('prog').style.width = (i / (PASOS.length - 1) * 100) + '%';
+  $('cnt').textContent = i === 0 ? '' : `Paso ${i} de ${PASOS.length - 1}`;
+  try { history.replaceState(null, '', '#paso-' + i); } catch(_){}
+}
+$('prev').addEventListener('click', () => ir(cur - 1));
+$('cvStart').addEventListener('click', () => ir(1));
+$('next').addEventListener('click', () => ir(cur + 1));
+document.addEventListener('keydown', e => {
+  const tg = e.target.tagName; if (tg === 'INPUT' || tg === 'SELECT' || tg === 'TEXTAREA') return;
+  if (['ArrowRight','PageDown'].includes(e.key) || (e.key === ' ' && tg !== 'BUTTON')){ e.preventDefault(); ir(cur + 1); }
+  else if (['ArrowLeft','PageUp'].includes(e.key)){ e.preventDefault(); ir(cur - 1); }
+  else if (e.key === 'Home') ir(0); else if (e.key === 'End') ir(PASOS.length - 1);
+});
+$('fs').addEventListener('click', () => { const d = document; if (d.fullscreenElement) d.exitFullscreen && d.exitFullscreen().catch(()=>{}); else d.documentElement.requestFullscreen && d.documentElement.requestFullscreen().catch(()=>{}); });
+// tooltip
+const tip = $('tip');
+function mover(e){ const t = e.target.closest && e.target.closest('[data-tip]'); if (!t || !t.dataset.tip){ tip.style.opacity = 0; return; } tip.innerHTML = t.dataset.tip;
+  const x = Math.min(innerWidth - tip.offsetWidth - 8, e.clientX + 14), y = e.clientY + 16 + tip.offsetHeight > innerHeight ? e.clientY - tip.offsetHeight - 12 : e.clientY + 16;
+  tip.style.left = Math.max(8, x) + 'px'; tip.style.top = y + 'px'; tip.style.opacity = 1; }
+document.addEventListener('mousemove', mover);
+window.addEventListener('hashchange', () => { const m = location.hash.match(/^#paso-(\d+)$/); if (m && +m[1] !== cur) ir(+m[1]); });
+const h0 = (location.hash.match(/^#paso-(\d+)$/) || [])[1];
+ir(h0 ? +h0 : 0);
+})();
+</script>
+</body>
+</html>
